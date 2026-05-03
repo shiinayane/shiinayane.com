@@ -8,8 +8,8 @@ import type {
 import { LinkPreset } from "./types/config";
 
 export const siteConfig: SiteConfig = {
-	title: "YKYKY",
-	subtitle: "Signal Garden",
+	title: "SHIINAYANE",
+	subtitle: "YK's Blog",
 	lang: "en", // Language code, e.g. 'en', 'zh_CN', 'ja', etc.
 	themeColor: {
 		hue: 180, // Default hue for the theme color, from 0 to 360. e.g. red: 0, teal: 200, cyan: 250, pink: 345
@@ -37,21 +37,21 @@ export const siteConfig: SiteConfig = {
 		//   sizes: '32x32',              // (Optional) Size of the favicon, set only if you have favicons of different sizes
 		// }
 		{
-		  src: '/favicon/avatar-32.png',
-		  sizes: '32x32',
-		},
-				{
-		  src: '/favicon/avatar-64.png',
-		  sizes: '64x64',
-		},
-				{
-		  src: '/favicon/avatar-128.png',
-		  sizes: '128x128',
+			src: "/favicon/avatar-32.png",
+			sizes: "32x32",
 		},
 		{
-		  src: '/favicon/avatar-256.png',
-		  sizes: '256x256',
-		}
+			src: "/favicon/avatar-64.png",
+			sizes: "64x64",
+		},
+		{
+			src: "/favicon/avatar-128.png",
+			sizes: "128x128",
+		},
+		{
+			src: "/favicon/avatar-256.png",
+			sizes: "256x256",
+		},
 	],
 };
 
