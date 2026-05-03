@@ -15,7 +15,8 @@ type AstroClientDirectiveProps = {
 	"client:only"?: string;
 };
 
-let {}: AstroClientDirectiveProps = $props();
+let { "client:only": clientOnly }: AstroClientDirectiveProps = $props();
+void clientOnly;
 
 const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];
 let mode: LIGHT_DARK_MODE = $state(AUTO_MODE);
