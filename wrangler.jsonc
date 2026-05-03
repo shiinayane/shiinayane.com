@@ -1,0 +1,7 @@
+{
+  "name": "shiinayane-com",
+  "compatibility_date": "2026-05-03", // Update to the day you deploy
+  "assets": {
+    "directory": "./dist"
+  }
+}
