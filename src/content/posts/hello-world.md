@@ -17,7 +17,7 @@ This blog will be a place to document my learning journey and share insights. Yo
 - 📚 **Learning Reflections**: I'll also dive into reflections on my learning process, strategies, and new concepts I come across.
 - 🎨 **Interests and Miscellaneous Thoughts**: Occasionally, I'll post about topics outside of tech, like my fascination with Renaissance art (one of my general education courses 😊).
 
-I hope this blog can provide inspiration and assistance to you in some way. If you have questions or thoughts about what I share, feel free to leave a comment or reach out by email at [<i class="fa-solid fa-envelope"></i>ykwang224@gmail.com](mailto:ykwang224@gmail.com).
+I hope this blog can provide inspiration and assistance to you in some way. If you have questions or thoughts about what I share, feel free to leave a comment or reach out by email at [ykwang224@gmail.com](mailto:ykwang224@gmail.com).
 
 Let’s dive into the world of knowledge, grow together, and enjoy the journey of discovery! Thanks again for stopping by—I look forward to connecting with you!
 

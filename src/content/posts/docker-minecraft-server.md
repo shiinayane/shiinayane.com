@@ -14,7 +14,10 @@ And luckily, we have itzg/minecraft-server!
   
 ## Intro
 
-The GitHub link: [<i class="fa-brands fa-github"></i>itzg/docker-minecraft-server](https://github.com/itzg/docker-minecraft-server)  
+The GitHub link:
+
+::github{repo="itzg/docker-minecraft-server"}
+
 Some simple intro from its doc ([https://docker-minecraft-server.readthedocs.io/en/latest/](https://docker-minecraft-server.readthedocs.io/en/latest/)):  
   
 > This docker image provides a Minecraft Server that will automatically download the latest stable version at startup. You can also run/upgrade to any specific version or the latest snapshot. See the Versions section below for more information.  

@@ -1,9 +1,9 @@
 # About Me
 
-GitHub: [grommet-icons:github shiinayane](https://github.com/shiinayane)
-E-Mail: [grommet-icons:mail ykwang224@gmail.com](mailto:ykwang224@gmail.com)
+GitHub: [shiinayane](https://github.com/shiinayane)
+E-Mail: [ykwang224@gmail.com](mailto:ykwang224@gmail.com)
 
-## grommet-icons:test Education
+## Education
 
 **The University of Tokyo 東京大学**  
 *Graduate, Information & Communication Engineering*  
@@ -19,7 +19,7 @@ Shanghai, China (Sep. 2021 – Jul. 2025)
 
 ---
 
-## grommet-icons:group Experience
+## Experience
 
 ### GlucoPI — Diabetes Management and Glucose Prediction System
 
@@ -44,13 +44,12 @@ Co-Leader | Advisor: [Prof. Qi Zhang](https://scie.shu.edu.cn/Prof/zhangq.htm) |
 - Designed teacher/student workflows for **course management**, **attendance tracking**, and **basic engagement analytics**.
 - Implemented a **Flutter mobile client** and **FastAPI backend** with a clear frontend–backend architecture to support concurrent classroom usage.
 - GitHub:  
-  - Frontend:
   - ::github{repo="shiinayane/Arrived-or-Not-Frontend"}
   - ::github{repo="shiinayane/Arrived-or-Not-Backend"}
 
 ---
 
-## grommet-icons:settings-option Skills
+## Skills
 
 - **Programming Languages**: Python, Swift, Javascript
 - **Environment and Software**: Mac, Windows, Linux, Git, Docker
@@ -58,7 +57,7 @@ Co-Leader | Advisor: [Prof. Qi Zhang](https://scie.shu.edu.cn/Prof/zhangq.htm) |
 
 ---
 
-## grommet-icons:circle-alert Miscellaneous
+## Miscellaneous
 
 - **Languages Proficiency**: Chinese (Native), English (Professional), Japanese (Business)
 - **Certificates**:  

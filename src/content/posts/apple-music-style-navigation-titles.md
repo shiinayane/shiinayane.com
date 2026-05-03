@@ -10,7 +10,7 @@ In the iOS 26, some system apps like Apple Music introduced a subtle UI pattern:
 
 This is different from the classic **large-title collapse behavior** that has existed since iOS 11.
 
-![example in Apple Music](/images/Picsew_20260403230045.PNG)
+![example in Apple Music](./images/Picsew_20260403230045.PNG)
 
 Traditional behavior:
 
