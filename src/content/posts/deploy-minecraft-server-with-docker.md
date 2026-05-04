@@ -66,7 +66,7 @@ services:
   
 If you are a beginner of Docker, you may be confused about the volumes. Well, it’s actually quite simple; you can look at one possible structure below.  
   
-```tree
+```plain
 Your-MC-Server-Folder
 ├── data
 │   ├── config

@@ -10,7 +10,7 @@ In the iOS 26, some system apps like Apple Music introduced a subtle UI pattern:
 
 This is different from the classic **large-title collapse behavior** that has existed since iOS 11.
 
-![example in Apple Music](./images/Picsew_20260403230045.PNG)
+![example in Apple Music](./assets/apple-music-style-navigation-titles/navigation-title-collapse.png)
 
 Traditional behavior:
 
@@ -212,7 +212,7 @@ This trick works because of how SwiftUI currently renders navigation titles, but
 - Toolbar items may still occupy layout space.
 - It relies on current SwiftUI behavior and could change in future versions.
 
-In other words, this is a visual shortcut, not a full reimplementation of the Apple Music UI.
+In other words, this is a visual shortcut, not a full re-implementation of the Apple Music UI.
 
 ## Will Apple Provide an Official API?
 

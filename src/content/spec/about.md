@@ -1,14 +1,15 @@
 # About Me
 
 GitHub: [shiinayane](https://github.com/shiinayane)
-E-Mail: [ykwang224@gmail.com](mailto:ykwang224@gmail.com)
+
+E-Mail: ykwang224[AT]gmail.com
 
 ## Education
 
 **The University of Tokyo 東京大学**  
 *Graduate, Information & Communication Engineering*  
 Tokyo, Japan (Oct. 2025 – Now)
-
+  
 - Supervised by [Prof. Toyotaro Suzumura](https://sites.google.com/view/toyolab/suzumura-1?authuser=0), currently research on **Robot** & **VLA**.
 
 **Shanghai University 上海大学**  
@@ -31,8 +32,8 @@ Undergraduate Graduation Project | Advisor: [Prof. Qi Zhang](https://scie.shu.ed
 - Integrated **short-horizon glucose prediction** using **PyTorch**, reproducing the main pipeline of **GluPred** and evaluating on the **OhioT1DM dataset**.
 - Designed scalable data and service architecture using **MySQL**, **MongoDB**, and **WebSocket**.
 - Added a lightweight **LLM-based health Q&A assistant** for non-diagnostic guidance.
-- GitHub:
-- ::github{repo="shiinayane/glucopi"}
+
+::github{repo="shiinayane/glucopi"}
 
 ### Arrived or Not — Intelligent Attendance System Based on Machine Vision
 
@@ -43,17 +44,45 @@ Co-Leader | Advisor: [Prof. Qi Zhang](https://scie.shu.edu.cn/Prof/zhangq.htm) |
 - Reduced manual roll-call workload by enabling automated attendance recognition and logging.
 - Designed teacher/student workflows for **course management**, **attendance tracking**, and **basic engagement analytics**.
 - Implemented a **Flutter mobile client** and **FastAPI backend** with a clear frontend–backend architecture to support concurrent classroom usage.
-- GitHub:  
-  - ::github{repo="shiinayane/Arrived-or-Not-Frontend"}
-  - ::github{repo="shiinayane/Arrived-or-Not-Backend"}
+
+::github{repo="shiinayane/Arrived-or-Not-Frontend"}
+::github{repo="shiinayane/Arrived-or-Not-Backend"}
 
 ---
 
 ## Skills
 
-- **Programming Languages**: Python, Swift, Javascript
-- **Environment and Software**: Mac, Windows, Linux, Git, Docker
-- **Libraries and Frameworks**: PyTorch, FastAPI, SwiftUI, SQLite
+### Mobile (iOS)
+
+- Swift, SwiftUI
+
+- MVVM Architecture, State Management
+
+- Networking, Async/Await
+
+### Backend
+
+- Python, FastAPI
+
+- RESTful API Design
+
+- Authentication, Data Modeling
+
+- SQLite / Basic Database Design
+
+### AI Integration
+
+- LLM APIs (OpenAI / Claude)
+
+- Prompt Engineering
+
+- Basic RAG Pipeline
+
+### Engineering
+
+- Git, Docker
+
+- CI/CD (if used)
 
 ---
 
