@@ -7,7 +7,7 @@ category: Tech
 draft: false
 ---
 
-Recently I went through a number of static site generators in the Swift ecosystem — [loopwerk/Saga](https://github.com/loopwerk/Saga), [toucansites/toucan](https://github.com/toucansites/toucan), [JohnSundell/Publish](https://github.com/JohnSundell/Publish), [twostraws/Ignite](https://github.com/twostraws/Ignite), and [raptor-build/raptor](https://github.com/raptor-build/raptor) — and compared them with more mature Web-native tools like [withastro/astro](https://github.com/withastro/astro), [hexojs/hexo](https://github.com/hexojs/hexo), [gohugoio/hugo](https://github.com/gohugoio/hugo), and [jekyll/jekyll](https://github.com/jekyll/jekyll).
+Recently I went through a number of static site generators in the Swift ecosystem — [Saga](https://github.com/loopwerk/Saga), [Toucan](https://github.com/toucansites/toucan), [Publish](https://github.com/JohnSundell/Publish), [Ignite](https://github.com/twostraws/Ignite), and [Raptor](https://github.com/raptor-build/raptor) — and compared them with more mature Web-native tools like [Astro](https://github.com/withastro/astro), [Hexo](https://github.com/hexojs/hexo), [Hugo](https://github.com/gohugoio/hugo), and [Jekyll](https://github.com/jekyll/jekyll).
 
 At first, my question was simple:
 
