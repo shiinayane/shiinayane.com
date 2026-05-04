@@ -1,10 +1,10 @@
 # About Me
 
-GitHub: [shiinayane](https://github.com/shiinayane)
+GitHub: [simple-icons:github shiinayane](https://github.com/shiinayane)
 
-E-Mail: ykwang224[AT]gmail.com
+E-Mail: ykwang224 majesticons:mail gmail.com
 
-## Education
+## majesticons:academic-cap Education
 
 **The University of Tokyo 東京大学**  
 *Graduate, Information & Communication Engineering*  
@@ -20,7 +20,7 @@ Shanghai, China (Sep. 2021 – Jul. 2025)
 
 ---
 
-## Experience
+## majesticons:code-block Experience
 
 ### GlucoPI — Diabetes Management and Glucose Prediction System
 
@@ -50,7 +50,7 @@ Co-Leader | Advisor: [Prof. Qi Zhang](https://scie.shu.edu.cn/Prof/zhangq.htm) |
 
 ---
 
-## Skills
+## majesticons:settings-cog Skills
 
 ### Mobile (iOS)
 
@@ -86,7 +86,7 @@ Co-Leader | Advisor: [Prof. Qi Zhang](https://scie.shu.edu.cn/Prof/zhangq.htm) |
 
 ---
 
-## Miscellaneous
+## majesticons:alert-circle Miscellaneous
 
 - **Languages Proficiency**: Chinese (Native), English (Professional), Japanese (Business)
 - **Certificates**:  

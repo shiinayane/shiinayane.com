@@ -79,17 +79,32 @@ export const profileConfig: ProfileConfig = {
 		// 	icon: "fa6-brands:twitter", // Visit https://icones.js.org/ for icon codes
 		// 	// You will need to install the corresponding icon set if it's not already included
 		// 	// `pnpm add @iconify-json/<icon-set-name>`
-		// 	url: "https://twitter.com",
+		// 	url: "https://twitter.com",https://music.apple.com/profile/shiinayane
 		// },
 		{
-			name: "Steam",
-			icon: "fa6-brands:steam",
-			url: "https://store.steampowered.com",
+			name: "GitHub",
+			icon: "simple-icons:github",
+			url: "https://github.com/shiinayane",
 		},
 		{
-			name: "GitHub",
-			icon: "fa6-brands:github",
-			url: "https://github.com/shiinayane",
+			name: "Steam",
+			icon: "simple-icons:steam",
+			url: "https://steamcommunity.com/profiles/76561198092391831",
+		},
+		{
+			name: "Apple Music",
+			icon: "simple-icons:applemusic",
+			url: "https://music.apple.com/profile/shiinayane",
+		},
+		{
+			name: "bilibili",
+			icon: "simple-icons:bilibili",
+			url: "https://space.bilibili.com/3284596",
+		},
+		{
+			name: "zhihu",
+			icon: "simple-icons:zhihu",
+			url: "https://www.zhihu.com/people/huan-ying-misaki",
 		},
 	],
 };
