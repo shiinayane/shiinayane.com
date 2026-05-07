@@ -1,8 +1,8 @@
 ---
 title: グラフ理論(グラフ)
 published: 2025-02-21
-tags: [Japanese, Note]
-category: Knowledge
+tags: [Graph Theory, Mathematics]
+category: Computer Science
 draft: false
 lang: jp
 ---

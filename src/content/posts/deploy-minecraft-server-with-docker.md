@@ -1,8 +1,8 @@
 ---
 title: Use Docker to Deploy a Minecraft server
 published: 2026-01-15
-tags: [English, Docker, Game]
-category: Game
+tags: [Docker, Minecraft, Server]
+category: Engineering
 draft: false
 ---
 

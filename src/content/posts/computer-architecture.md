@@ -1,8 +1,8 @@
 ---
 title: コンピュアーキまとめ
 published: 2025-01-26
-tags: [Japanese, Note]
-category: Knowledge
+tags: [Computer Architecture]
+category: Computer Science
 draft: false
 lang: jp
 ---

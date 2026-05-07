@@ -1,8 +1,8 @@
 ---
 title: グラフ理論(木)
 published: 2025-02-21
-tags: [Japanese, Note]
-category: Knowledge
+tags: [Graph Theory, Trees]
+category: Computer Science
 draft: false
 lang: jp
 ---

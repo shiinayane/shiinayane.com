@@ -1,8 +1,8 @@
 ---
 title: グラフアルゴリズム
 published: 2025-02-21
-tags: [Japanese, Note]
-category: Knowledge
+tags: [Algorithms, Graph Theory]
+category: Computer Science
 draft: false
 lang: jp
 ---

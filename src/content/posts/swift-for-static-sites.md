@@ -2,8 +2,8 @@
 title: Swift for Static Sites
 published: 2026-05-01
 description: SwiftUI Purism vs Web-Native Reality
-tags: [English, Swift, SwiftUI, SSG]
-category: Tech
+tags: [Swift, SwiftUI, SSG, Web]
+category: Engineering
 draft: false
 ---
 

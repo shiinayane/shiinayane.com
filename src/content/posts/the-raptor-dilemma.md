@@ -1,9 +1,9 @@
 ---
 title: The Raptor Dilemma
-published: 2026-05-01
+published: 2026-05-02
 description: SwiftUI Dreams vs Web Reality
-tags: [English, Swift, SwiftUI, SSG]
-category: Tech
+tags: [Swift, SwiftUI, Raptor, SSG, Web]
+category: Engineering
 draft: false
 ---
 

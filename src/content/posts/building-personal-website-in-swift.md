@@ -2,8 +2,8 @@
 title: Building a Personal Website in Swift
 published: 2026-04-21
 description: I Thought It Was Easy… Until It Wasn’t
-tags: [English, Swift, SwiftUI, SSG]
-category: Tech
+tags: [Swift, Raptor, SSG, Web]
+category: Engineering
 draft: false
 ---
 

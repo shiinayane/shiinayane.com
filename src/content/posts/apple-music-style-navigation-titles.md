@@ -1,8 +1,8 @@
 ---
 title: Recreating Apple Music–Style Collapsing Navigation Titles in SwiftUI
 published: 2026-04-03
-tags: [English, SwiftUI]
-category: Tech
+tags: [SwiftUI, iOS, UI]
+category: Engineering
 draft: false
 ---
 
