@@ -10,9 +10,25 @@ async function getRawSortedPosts() {
 	});
 
 	const sorted = allBlogPosts.sort((a, b) => {
-		const dateA = new Date(a.data.published);
-		const dateB = new Date(b.data.published);
-		return dateA > dateB ? -1 : 1;
+		const dateA = new Date(a.data.published).getTime();
+		const dateB = new Date(b.data.published).getTime();
+		// Primary: newest first.
+		if (dateA !== dateB) return dateB - dateA;
+
+		// Same date: keep a series in reading order (lower seriesOrder first,
+		// so article 1 sits above article 2 on the page).
+		const sameSeries = !!a.data.series && a.data.series === b.data.series;
+		if (
+			sameSeries &&
+			a.data.seriesOrder != null &&
+			b.data.seriesOrder != null
+		) {
+			return a.data.seriesOrder - b.data.seriesOrder;
+		}
+
+		// Final deterministic tiebreaker so the order never depends on the
+		// JS engine's sort when published dates collide.
+		return a.slug.localeCompare(b.slug);
 	});
 	return sorted;
 }
