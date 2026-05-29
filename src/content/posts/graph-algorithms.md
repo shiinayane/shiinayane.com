@@ -5,6 +5,8 @@ tags: [Algorithms, Graph Theory]
 category: Computer Science
 draft: false
 lang: jp
+series: "cs-notes"
+seriesOrder: 5
 ---
 
 ## 基本的なグラフアルゴリズム

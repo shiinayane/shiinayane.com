@@ -12,7 +12,9 @@ const series = await Promise.all(
 	}),
 );
 // Show the series with the most articles first; stable by name otherwise.
-series.sort((a, b) => b.count - a.count || a.meta.name.localeCompare(b.meta.name));
+series.sort(
+	(a, b) => b.count - a.count || a.meta.name.localeCompare(b.meta.name),
+);
 ---
 
 <MainGridLayout title="Series" description="Article series on this site.">

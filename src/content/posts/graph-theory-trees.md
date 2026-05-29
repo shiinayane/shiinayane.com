@@ -5,6 +5,8 @@ tags: [Graph Theory, Trees]
 category: Computer Science
 draft: false
 lang: jp
+series: "cs-notes"
+seriesOrder: 4
 ---
 
 以下はグラフ理論における木部分である。

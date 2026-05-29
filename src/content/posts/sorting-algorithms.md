@@ -5,6 +5,8 @@ tags: [Algorithms, Sorting]
 category: Computer Science
 draft: false
 lang: jp
+series: "cs-notes"
+seriesOrder: 2
 ---
 
 ## 挿入ソート

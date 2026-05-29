@@ -12,6 +12,10 @@ export const SERIES_META: Record<string, SeriesMeta> = {
 		subtitle:
 			"Building a clean macOS development environment that survives migrations, upgrades, and your future self.",
 	},
+	"cs-notes": {
+		name: "CS 学習ノート",
+		subtitle: "コンピュータサイエンスの基礎を日本語でまとめた学習ノート。",
+	},
 };
 
 export function getSeriesMeta(slug: string): SeriesMeta {

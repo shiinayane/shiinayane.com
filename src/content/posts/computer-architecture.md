@@ -5,6 +5,8 @@ tags: [Computer Architecture]
 category: Computer Science
 draft: false
 lang: jp
+series: "cs-notes"
+seriesOrder: 1
 ---
 
 ここで、教科書に暗記必要である知識をまとめて書きました。
