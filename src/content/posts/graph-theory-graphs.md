@@ -6,7 +6,7 @@ category: Computer Science
 draft: false
 lang: jp
 series: "cs-notes"
-seriesOrder: 3
+seriesOrder: 2
 ---
 
 以下はグラフ理論におけるグラフ部分である。

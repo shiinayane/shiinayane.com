@@ -6,7 +6,7 @@ category: Computer Science
 draft: false
 lang: jp
 series: "cs-notes"
-seriesOrder: 2
+seriesOrder: 4
 ---
 
 ## 挿入ソート

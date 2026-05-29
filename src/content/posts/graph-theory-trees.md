@@ -6,7 +6,7 @@ category: Computer Science
 draft: false
 lang: jp
 series: "cs-notes"
-seriesOrder: 4
+seriesOrder: 3
 ---
 
 以下はグラフ理論における木部分である。
