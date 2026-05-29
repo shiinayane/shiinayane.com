@@ -1,3 +1,5 @@
+// Touch this file to force Astro to clear and rebuild the content store on
+// deploy (avoids stale frontmatter from a cached build).
 import { defineCollection, z } from "astro:content";
 
 const postsCollection = defineCollection({
