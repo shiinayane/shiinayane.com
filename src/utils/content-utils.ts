@@ -72,6 +72,44 @@ export async function getTagList(): Promise<Tag[]> {
 	return keys.map((key) => ({ name: key, count: countMap[key] }));
 }
 
+export type SeriesEntry = {
+	slug: string;
+	data: CollectionEntry<"posts">["data"];
+};
+
+// All posts belonging to one series, ordered by seriesOrder (falling back to
+// publication date). Drafts follow the same PROD-hiding rule as the rest of
+// the site, so unpublished entries only appear in dev.
+export async function getSeriesPosts(series: string): Promise<SeriesEntry[]> {
+	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
+		const visible = import.meta.env.PROD ? data.draft !== true : true;
+		return visible && data.series === series;
+	});
+
+	const sorted = allBlogPosts.sort((a, b) => {
+		const orderA = a.data.seriesOrder ?? Number.POSITIVE_INFINITY;
+		const orderB = b.data.seriesOrder ?? Number.POSITIVE_INFINITY;
+		if (orderA !== orderB) return orderA - orderB;
+		return (
+			new Date(a.data.published).getTime() -
+			new Date(b.data.published).getTime()
+		);
+	});
+
+	return sorted.map((post) => ({ slug: post.slug, data: post.data }));
+}
+
+// Distinct series slugs present across all posts.
+export async function getSeriesList(): Promise<string[]> {
+	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
+		const visible = import.meta.env.PROD ? data.draft !== true : true;
+		return visible && !!data.series;
+	});
+	const set = new Set<string>();
+	for (const post of allBlogPosts) set.add(post.data.series);
+	return Array.from(set).sort();
+}
+
 export type Category = {
 	name: string;
 	count: number;

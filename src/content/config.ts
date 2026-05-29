@@ -12,6 +12,12 @@ const postsCollection = defineCollection({
 		category: z.string().optional().nullable().default(""),
 		lang: z.string().optional().default(""),
 
+		/* Series grouping (e.g. "sovereign-tools"). seriesOrder positions the
+		   post within its series; both are optional so non-series posts are
+		   unaffected. The /series/[series] index reads these automatically. */
+		series: z.string().optional().default(""),
+		seriesOrder: z.number().optional(),
+
 		/* For internal use */
 		prevTitle: z.string().default(""),
 		prevSlug: z.string().default(""),
