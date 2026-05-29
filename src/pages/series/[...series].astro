@@ -1,4 +1,5 @@
 ---
+import { getSeriesMeta } from "@constants/series";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import {
 	getSeriesList,
@@ -7,16 +8,6 @@ import {
 } from "@utils/content-utils";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { getPostUrlBySlug } from "@utils/url-utils";
-
-// Human-readable metadata for known series. Unknown series fall back to a
-// title derived from the slug, so adding a new series needs no code change.
-const SERIES_META: Record<string, { name: string; subtitle: string }> = {
-	"sovereign-tools": {
-		name: "Sovereign Tools",
-		subtitle:
-			"Building a clean macOS development environment that survives migrations, upgrades, and your future self.",
-	},
-};
 
 export async function getStaticPaths() {
 	const series = await getSeriesList();
@@ -35,10 +26,7 @@ interface Props {
 }
 
 const { series, posts } = Astro.props as Props;
-const meta = SERIES_META[series] ?? {
-	name: series.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-	subtitle: "",
-};
+const meta = getSeriesMeta(series);
 ---
 
 <MainGridLayout title={meta.name} description={meta.subtitle}>

@@ -15,15 +15,16 @@ async function getRawSortedPosts() {
 		// Primary: newest first.
 		if (dateA !== dateB) return dateB - dateA;
 
-		// Same date: keep a series in reading order (lower seriesOrder first,
-		// so article 1 sits above article 2 on the page).
+		// Same date: keep the home page newest-first by treating a higher
+		// seriesOrder as "newer", so article 7 sits above article 1. (The
+		// series index page sorts ascending for proper reading order.)
 		const sameSeries = !!a.data.series && a.data.series === b.data.series;
 		if (
 			sameSeries &&
 			a.data.seriesOrder != null &&
 			b.data.seriesOrder != null
 		) {
-			return a.data.seriesOrder - b.data.seriesOrder;
+			return b.data.seriesOrder - a.data.seriesOrder;
 		}
 
 		// Final deterministic tiebreaker so the order never depends on the

@@ -59,6 +59,10 @@ export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Home,
 		LinkPreset.Archive,
+		{
+			name: "Series",
+			url: "/series/", // Internal links should not include the base path, as it is automatically added
+		},
 		LinkPreset.About,
 		LinkPreset.Contact,
 		{
