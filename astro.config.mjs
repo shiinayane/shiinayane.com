@@ -116,11 +116,15 @@ export default defineConfig({
 			[
 				rehypeKatex,
 				{
-					// Emit only the visual HTML, not the hidden MathML copy.
-					// KaTeX defaults to "htmlAndMathml", roughly doubling the
-					// math DOM on formula-heavy notes. Trade-off: screen
-					// readers lose the semantic MathML annotation.
-					output: "html",
+					// Emit native MathML instead of KaTeX's span-based HTML.
+					// The HTML output produces ~10k <span> nodes plus ~1MB of
+					// KaTeX fonts and an 89KB stylesheet per math-heavy note;
+					// MathML lets the browser render <math> natively with zero
+					// extra CSS/JS/fonts. Supported in all browsers since
+					// Chrome 109 (Jan 2023). strict:false silences warnings
+					// when Japanese text appears inside math.
+					output: "mathml",
+					strict: false,
 				},
 			],
 			rehypeSlug,

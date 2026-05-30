@@ -121,10 +121,20 @@
 
     }
 
-    .katex-display-container {
+    /* Native MathML output (rehype-katex output:"mathml"). No KaTeX CSS or
+       fonts are loaded; the browser renders <math> with system math fonts.
+       Block equations get centering + horizontal scroll for wide formulas. */
+    math {
+        /* Match KaTeX's default 1.21em so math keeps its familiar size. */
+        font-size: 1.21em;
+    }
+    math[display="block"] {
+        display: block;
+        width: fit-content;
         max-width: 100%;
+        margin: 1em auto;
         overflow-x: auto;
-        margin: 1em 0;
+        overflow-y: hidden;
     }
 
     /* Defer layout/paint of off-screen sections. Long math-heavy notes
