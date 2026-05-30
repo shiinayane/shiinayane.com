@@ -137,14 +137,4 @@
         overflow-y: hidden;
     }
 
-    /* Defer layout/paint of off-screen sections. Long math-heavy notes
-       produce 10k+ DOM nodes; this lets the browser skip rendering
-       sections until they scroll near the viewport. `auto` in
-       contain-intrinsic-size makes the browser remember each section's
-       real height after first render, keeping the scrollbar stable. */
-    section {
-        content-visibility: auto;
-        contain-intrinsic-size: auto 600px;
-    }
-
 }
