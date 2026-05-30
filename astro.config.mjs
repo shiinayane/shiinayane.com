@@ -113,7 +113,16 @@ export default defineConfig({
 			parseDirectiveNode,
 		],
 		rehypePlugins: [
-			rehypeKatex,
+			[
+				rehypeKatex,
+				{
+					// Emit only the visual HTML, not the hidden MathML copy.
+					// KaTeX defaults to "htmlAndMathml", roughly doubling the
+					// math DOM on formula-heavy notes. Trade-off: screen
+					// readers lose the semantic MathML annotation.
+					output: "html",
+				},
+			],
 			rehypeSlug,
 			[
 				rehypeComponents,
