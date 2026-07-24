@@ -248,3 +248,7 @@ BiliKit is still not at version 1.
 But the project has already changed the way I build software. I no longer treat an AI conversation as the place where engineering truth lives. The conversation is a worker inside a larger process. The repository holds the memory. Contracts hold the intent. Gates hold the evidence. Independent contexts challenge the story.
 
 And I remain responsible for deciding when any of it is good enough.
+
+---
+
+*I later extracted this workflow into reusable Codex Skills. The follow-up, [I Turned My AI Workflow into Code](/posts/i-turned-my-ai-workflow-into-code/), explains what survived the abstraction—and what had to remain project-specific.*
