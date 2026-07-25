@@ -60,6 +60,7 @@ const canonicalUrl = new URL(getLocaleUrl(locale, pageSuffix), Astro.site);
 		<Pagination
 			class="mx-auto onload-animation"
 			page={page}
+			locale={locale}
 			style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
 		/>
 	</div>
