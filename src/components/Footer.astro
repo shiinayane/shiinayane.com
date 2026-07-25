@@ -1,9 +1,8 @@
 ---
 
 import { profileConfig } from "../config";
-import { url } from "../utils/url-utils";
 import { DEFAULT_LOCALE, type Locale } from "../i18n/config";
-import { getLocaleUrl } from "../utils/url-utils";
+import { getLocaleUrl, url } from "../utils/url-utils";
 
 const currentYear = new Date().getFullYear();
 const locale: Locale = Astro.props.locale ?? DEFAULT_LOCALE;

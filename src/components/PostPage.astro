@@ -1,9 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import type { Page } from "astro";
-import { getPostUrlBySlug } from "@utils/url-utils";
-import { getPostTranslationKey } from "@utils/content-utils";
 import { DEFAULT_LOCALE, type Locale } from "@i18n/config";
+import { getPostTranslationKey } from "@utils/content-utils";
+import { getPostUrlBySlug } from "@utils/url-utils";
+import type { Page } from "astro";
 import PostCard from "./PostCard.astro";
 
 const { page, locale = DEFAULT_LOCALE } = Astro.props as {

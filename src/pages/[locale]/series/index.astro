@@ -1,8 +1,8 @@
 ---
 import { getSeriesMeta } from "@constants/series";
 import {
-	localeLanguageTag,
 	type Locale,
+	localeLanguageTag,
 	SUPPORTED_LOCALES,
 } from "@i18n/config";
 import I18nKey from "@i18n/i18nKey";
@@ -23,8 +23,7 @@ export async function getStaticPaths() {
 				})),
 			);
 			series.sort(
-				(a, b) =>
-					b.count - a.count || a.meta.name.localeCompare(b.meta.name),
+				(a, b) => b.count - a.count || a.meta.name.localeCompare(b.meta.name),
 			);
 			return { params: { locale }, props: { locale, series } };
 		}),

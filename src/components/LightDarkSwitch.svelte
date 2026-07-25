@@ -1,8 +1,8 @@
 <script lang="ts">
 import { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants.ts";
+import type { Locale } from "@i18n/config";
 import I18nKey from "@i18n/i18nKey";
 import { translate } from "@i18n/translation";
-import type { Locale } from "@i18n/config";
 import Icon from "@iconify/svelte";
 import {
 	applyThemeToDocument,
@@ -17,7 +17,8 @@ type AstroClientDirectiveProps = {
 	locale?: Locale;
 };
 
-let { "client:only": clientOnly, locale = "en" }: AstroClientDirectiveProps = $props();
+let { "client:only": clientOnly, locale = "en" }: AstroClientDirectiveProps =
+	$props();
 void clientOnly;
 
 const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];

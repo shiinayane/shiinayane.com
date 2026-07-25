@@ -1,8 +1,8 @@
 ---
 import { Icon } from "astro-icon/components";
+import { DEFAULT_LOCALE, type Locale } from "../../i18n/config";
 import I18nKey from "../../i18n/i18nKey";
 import { translate } from "../../i18n/translation";
-import { DEFAULT_LOCALE, type Locale } from "../../i18n/config";
 
 interface Props {
 	id: string;
@@ -13,7 +13,14 @@ interface Props {
 	style?: string;
 	locale?: Locale;
 }
-const { id, name, isCollapsed, collapsedHeight, style, locale = DEFAULT_LOCALE } = Astro.props;
+const {
+	id,
+	name,
+	isCollapsed,
+	collapsedHeight,
+	style,
+	locale = DEFAULT_LOCALE,
+} = Astro.props;
 const className = Astro.props.class;
 ---
 <widget-layout data-id={id} data-is-collapsed={String(isCollapsed)} class={"pb-4 card-base " + className} style={style}>

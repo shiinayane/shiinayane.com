@@ -1,18 +1,15 @@
-import { siteConfig } from "@/config";
+import rss from "@astrojs/rss";
 import {
+	type Locale,
 	localeLanguageTag,
 	SUPPORTED_LOCALES,
-	type Locale,
 } from "@i18n/config";
-import {
-	getLocalizedPosts,
-	getPostTranslationKey,
-} from "@utils/content-utils";
+import { getLocalizedPosts, getPostTranslationKey } from "@utils/content-utils";
 import { getPostUrlBySlug } from "@utils/url-utils";
-import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import MarkdownIt from "markdown-it";
 import sanitizeHtml from "sanitize-html";
+import { siteConfig } from "@/config";
 
 const parser = new MarkdownIt();
 

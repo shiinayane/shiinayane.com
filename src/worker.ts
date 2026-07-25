@@ -106,9 +106,7 @@ async function assetExists(
 	const url = new URL(request.url);
 	url.pathname = pathname;
 	url.search = "";
-	const response = await env.ASSETS.fetch(
-		new Request(url, { method: "HEAD" }),
-	);
+	const response = await env.ASSETS.fetch(new Request(url, { method: "HEAD" }));
 	return response.ok;
 }
 
@@ -179,12 +177,7 @@ export default {
 		}
 
 		if (url.pathname.startsWith("/posts/")) {
-			return redirectNeutralPost(
-				request,
-				env,
-				url.pathname,
-				url.search,
-			);
+			return redirectNeutralPost(request, env, url.pathname, url.search);
 		}
 
 		const neutralPageMatch = url.pathname.match(
@@ -194,12 +187,7 @@ export default {
 			const canonicalPath = url.pathname.endsWith("/")
 				? url.pathname
 				: `${url.pathname}/`;
-			return redirectNeutralPage(
-				request,
-				env,
-				canonicalPath,
-				url.search,
-			);
+			return redirectNeutralPage(request, env, canonicalPath, url.search);
 		}
 
 		return env.ASSETS.fetch(request);

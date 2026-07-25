@@ -1,7 +1,7 @@
 <script lang="ts">
+import type { Locale } from "@i18n/config";
 import I18nKey from "@i18n/i18nKey";
 import { translate } from "@i18n/translation";
-import type { Locale } from "@i18n/config";
 import Icon from "@iconify/svelte";
 import { getDefaultHue, getHue, setHue } from "@utils/setting-utils";
 

@@ -1,12 +1,8 @@
 ---
-import { getCollection, render, type CollectionEntry } from "astro:content";
+import { type CollectionEntry, getCollection, render } from "astro:content";
 import LanguageSwitcher from "@components/LanguageSwitcher.astro";
 import Markdown from "@components/misc/Markdown.astro";
-import {
-	localeLanguageTag,
-	normalizeLocale,
-	type Locale,
-} from "@i18n/config";
+import { type Locale, localeLanguageTag, normalizeLocale } from "@i18n/config";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { getLocaleUrl, url } from "@utils/url-utils";
 

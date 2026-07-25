@@ -8,7 +8,10 @@ export function remarkReadingTime() {
 		const language = String(data.astro.frontmatter.lang || "")
 			.toLowerCase()
 			.replaceAll("-", "_");
-		const isCjk = language.startsWith("zh") || language === "jp" || language.startsWith("ja");
+		const isCjk =
+			language.startsWith("zh") ||
+			language === "jp" ||
+			language.startsWith("ja");
 		// reading-time counts each Han/Hiragana/Hangul character as one word.
 		// Use a character-oriented rate for CJK instead of the English 200 WPM.
 		const readingTime = getReadingTime(textOnPage, {

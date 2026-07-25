@@ -3,9 +3,7 @@ export type SeriesMeta = {
 	subtitle: string;
 };
 
-type SeriesTranslations = Partial<
-	Record<"en" | "zh" | "ja", SeriesMeta>
->;
+type SeriesTranslations = Partial<Record<"en" | "zh" | "ja", SeriesMeta>>;
 
 // Human-readable metadata for known series, keyed by the `series` frontmatter
 // slug. Unknown slugs fall back to a title derived from the slug, so adding a

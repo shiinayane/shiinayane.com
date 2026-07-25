@@ -1,13 +1,13 @@
 import { type CollectionEntry, getCollection } from "astro:content";
-import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
-import { getCategoryUrl } from "@utils/url-utils.ts";
 import {
-	type Locale,
 	DEFAULT_LOCALE,
+	type Locale,
 	normalizeLocale,
 	SUPPORTED_LOCALES,
 } from "@i18n/config";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import { getCategoryUrl } from "@utils/url-utils.ts";
 
 export type PostEntry = CollectionEntry<"posts">;
 
@@ -111,8 +111,7 @@ export async function getTranslationManifest(): Promise<
 	}
 	for (const locales of Object.values(manifest)) {
 		locales.sort(
-			(a, b) =>
-				SUPPORTED_LOCALES.indexOf(a) - SUPPORTED_LOCALES.indexOf(b),
+			(a, b) => SUPPORTED_LOCALES.indexOf(a) - SUPPORTED_LOCALES.indexOf(b),
 		);
 	}
 	return manifest;
