@@ -7,6 +7,8 @@ import swup from "@swup/astro";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
+import { fileURLToPath } from "node:url";
+import { close as closePagefind, createIndex } from "pagefind";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeComponents from "rehype-components"; /* Render the custom directive content */
 import rehypeKatex from "rehype-katex";
@@ -23,6 +25,45 @@ import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
+
+function pagefindIntegration() {
+	return {
+		name: "pagefind",
+		hooks: {
+			"astro:build:done": async ({ dir }) => {
+				const outputDirectory = fileURLToPath(dir);
+				const { index, errors: createErrors } = await createIndex();
+				if (!index || createErrors.length > 0) {
+					throw new Error(
+						`Pagefind index creation failed: ${createErrors.join("; ")}`,
+					);
+				}
+
+				try {
+					const { errors: addErrors } = await index.addDirectory({
+						path: outputDirectory,
+					});
+					if (addErrors.length > 0) {
+						throw new Error(
+							`Pagefind indexing failed: ${addErrors.join("; ")}`,
+						);
+					}
+
+					const { errors: writeErrors } = await index.writeFiles({
+						outputPath: `${outputDirectory}/pagefind`,
+					});
+					if (writeErrors.length > 0) {
+						throw new Error(
+							`Pagefind output failed: ${writeErrors.join("; ")}`,
+						);
+					}
+				} finally {
+					await closePagefind();
+				}
+			},
+		},
+	};
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -112,6 +153,7 @@ export default defineConfig({
 				);
 			},
 		}),
+		pagefindIntegration(),
 	],
 	markdown: {
 		remarkPlugins: [
