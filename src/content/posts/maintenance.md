@@ -7,6 +7,8 @@ category: Engineering
 series: "sovereign-tools"
 seriesOrder: 7
 draft: false
+lang: en
+translationKey: maintenance
 ---
 
 Every clean environment I have ever built was clean for about six months. Then I looked closely and found three Python versions where I expected one, a Brewfile that no longer matched the machine, and a `mise list` full of runtimes I had installed for some experiment I could not even remember. Nothing had broken. It had just drifted, quietly, the way every system does the moment you stop watching it.

@@ -7,6 +7,8 @@ category: Engineering
 series: "sovereign-tools"
 seriesOrder: 1
 draft: false
+lang: en
+translationKey: manifesto
 ---
 
 A few weeks ago I put a Mac mini into DFU mode (Device Firmware Update — the state where the machine has no operating system of its own and waits for another Mac to write one onto it) and erased everything. I had told myself I was doing it to fix a stubborn problem. The honest version is that I wanted a clean machine, and the only way I trusted to get one was to start from nothing.

@@ -5,6 +5,7 @@ tags: [Graph Theory, Mathematics]
 category: Computer Science
 draft: false
 lang: jp
+translationKey: graph-theory-graphs
 series: "cs-notes"
 seriesOrder: 2
 ---

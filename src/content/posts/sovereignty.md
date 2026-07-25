@@ -7,6 +7,8 @@ category: Engineering
 series: "sovereign-tools"
 seriesOrder: 5
 draft: false
+lang: en
+translationKey: sovereignty
 ---
 
 There is a contradiction sitting at the center of this series, and a careful reader of the [previous article](/posts/python/) will have spotted it. I argued that `mise` should be the single owner of Python versions, and that `uv` managing its own Python was a problem to be corrected. But I also use `rustup` to manage Rust, and `mise` is perfectly capable of managing Rust too. So why is `uv` owning Python wrong while `rustup` owning Rust is right? Both are cases of a language-specific tool managing a runtime that `mise` could otherwise handle.

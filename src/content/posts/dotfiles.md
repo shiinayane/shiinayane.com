@@ -7,6 +7,8 @@ category: Engineering
 series: "sovereign-tools"
 seriesOrder: 2
 draft: false
+lang: en
+translationKey: dotfiles
 ---
 
 Here is a question I could not answer about my own machine for an embarrassingly long time: which lines in my `~/.zshrc` did I write, and which did an installer write for me?

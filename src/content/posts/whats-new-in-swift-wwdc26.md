@@ -6,6 +6,7 @@ tags: [Swift, WWDC, Programming]
 category: Engineering
 draft: false
 lang: en
+translationKey: whats-new-in-swift-wwdc26
 ---
 
 Every year the *What's New in Swift* session is the one talk I watch twice. The first pass is for the headline features; the second is for the small ergonomic changes that quietly remove friction I had stopped noticing. WWDC26's session — presented by Becca and Evan from the Swift team — covers **Swift 6.3 and 6.4**, and it splits cleanly into four buckets: everyday language ergonomics, library updates, cross-platform reach, and performance.

@@ -5,6 +5,8 @@ description: SwiftUI Purism vs Web-Native Reality
 tags: [Swift, SwiftUI, SSG, Web]
 category: Engineering
 draft: false
+lang: en
+translationKey: swift-for-static-sites
 ---
 
 Recently I went through a number of static site generators in the Swift ecosystem — [Saga](https://github.com/loopwerk/Saga), [Toucan](https://github.com/toucansites/toucan), [Publish](https://github.com/JohnSundell/Publish), [Ignite](https://github.com/twostraws/Ignite), and [Raptor](https://github.com/raptor-build/raptor) — and compared them with more mature Web-native tools like [Astro](https://github.com/withastro/astro), [Hexo](https://github.com/hexojs/hexo), [Hugo](https://github.com/gohugoio/hugo), and [Jekyll](https://github.com/jekyll/jekyll).

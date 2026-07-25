@@ -5,6 +5,7 @@ tags: [Algorithms, Graph Theory]
 category: Computer Science
 draft: false
 lang: jp
+translationKey: graph-algorithms
 series: "cs-notes"
 seriesOrder: 5
 ---

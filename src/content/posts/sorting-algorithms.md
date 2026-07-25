@@ -5,6 +5,7 @@ tags: [Algorithms, Sorting]
 category: Computer Science
 draft: false
 lang: jp
+translationKey: sorting-algorithms
 series: "cs-notes"
 seriesOrder: 4
 ---

@@ -7,6 +7,8 @@ category: Engineering
 series: "sovereign-tools"
 seriesOrder: 6
 draft: false
+lang: en
+translationKey: polyglot
 ---
 
 This is the reference chapter. The earlier articles built an architecture and a principle; this one applies them, language by language, so that when you start a project in any of these ecosystems you have a known-good shape to reach for. It is meant to be returned to a section at a time, not read straight through.

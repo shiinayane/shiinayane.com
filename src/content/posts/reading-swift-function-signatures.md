@@ -5,6 +5,7 @@ tags: [Swift, Programming]
 category: Engineering
 draft: false
 lang: en
+translationKey: reading-swift-function-signatures
 ---
 
 When I first started learning Swift, I absolutely hated reading function signatures.

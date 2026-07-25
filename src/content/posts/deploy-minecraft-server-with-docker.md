@@ -4,6 +4,8 @@ published: 2026-01-15
 tags: [Docker, Minecraft, Server]
 category: Engineering
 draft: false
+lang: en
+translationKey: deploy-minecraft-server-with-docker
 ---
 
 Recently, I wanted to start a Minecraft server on my Mac. It’s quite simple to run `./run.bash` in the server directory, but obviously not elegant enough since you have to keep the terminal and Java interface running in the background. Besides, though, Screen can hide the terminal, but it has no idea of the Java service.  

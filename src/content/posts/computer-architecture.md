@@ -5,6 +5,7 @@ tags: [Computer Architecture]
 category: Computer Science
 draft: false
 lang: jp
+translationKey: computer-architecture
 series: "cs-notes"
 seriesOrder: 1
 ---

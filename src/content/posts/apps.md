@@ -7,6 +7,8 @@ category: Engineering
 series: "sovereign-tools"
 seriesOrder: 3
 draft: false
+lang: en
+translationKey: apps
 ---
 
 I do not keep my Brewfile strictly in sync with what is installed on my machine, and that is a deliberate choice rather than laziness I have failed to fix.

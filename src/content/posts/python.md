@@ -7,6 +7,8 @@ category: Engineering
 series: "sovereign-tools"
 seriesOrder: 4
 draft: false
+lang: en
+translationKey: python
 ---
 
 It started with a discrepancy I could not explain. I ran the same command in two directories and got two different answers:

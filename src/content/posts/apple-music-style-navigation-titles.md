@@ -4,6 +4,8 @@ published: 2026-04-03
 tags: [SwiftUI, iOS, UI]
 category: Engineering
 draft: false
+lang: en
+translationKey: apple-music-style-navigation-titles
 ---
 
 In the iOS 26, some system apps like Apple Music introduced a subtle UI pattern: **the navigation title and toolbar area disappear completely when scrolling.**

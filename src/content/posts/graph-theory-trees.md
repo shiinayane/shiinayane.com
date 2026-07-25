@@ -5,6 +5,7 @@ tags: [Graph Theory, Trees]
 category: Computer Science
 draft: false
 lang: jp
+translationKey: graph-theory-trees
 series: "cs-notes"
 seriesOrder: 3
 ---
