@@ -7,6 +7,13 @@ export const en: Translation = {
 	[Key.archive]: "Archive",
 	[Key.contact]: "Contact",
 	[Key.search]: "Search",
+	[Key.series]: "Series",
+	[Key.article]: "article",
+	[Key.articles]: "articles",
+	[Key.noSeries]: "No series yet.",
+	[Key.noSeriesPosts]: "No articles in this series yet.",
+	[Key.drafting]: "drafting",
+	[Key.published]: "published",
 
 	[Key.tags]: "Tags",
 	[Key.categories]: "Categories",

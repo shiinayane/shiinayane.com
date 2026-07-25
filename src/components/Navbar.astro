@@ -37,7 +37,9 @@ let links: NavBarLink[] = navBarConfig.links.map(
 					? getLocaleUrl(locale)
 					: item === LinkPreset.Archive
 						? getLocaleUrl(locale, "/archive/")
-						: preset.url;
+						: item === LinkPreset.About
+							? getLocaleUrl(locale, "/about/")
+							: getLocaleUrl(locale, "/contact/");
 			return {
 				...preset,
 				name: translate(locale, presetKeys[item]),
@@ -48,6 +50,7 @@ let links: NavBarLink[] = navBarConfig.links.map(
 			return {
 				...item,
 				name: locale === "zh" ? "系列" : locale === "ja" ? "シリーズ" : item.name,
+				url: getLocaleUrl(locale, "/series/"),
 			};
 		}
 		return item;

@@ -1,3 +1,10 @@
+---
+lang: en
+translationKey: about
+title: About
+description: About YANKAI WANG, his projects, research, experience, and technical interests.
+---
+
 # About Me
 
 Tokyo, Japan

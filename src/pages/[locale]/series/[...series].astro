@@ -1,0 +1,153 @@
+---
+import { getSeriesMeta } from "@constants/series";
+import {
+	localeLanguageTag,
+	type Locale,
+	SUPPORTED_LOCALES,
+} from "@i18n/config";
+import I18nKey from "@i18n/i18nKey";
+import { translate } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import {
+	getSeriesList,
+	getSeriesPosts,
+	type SeriesEntry,
+} from "@utils/content-utils";
+import { formatDateToYYYYMMDD } from "@utils/date-utils";
+import { getLocaleUrl, getPostUrlBySlug, url } from "@utils/url-utils";
+
+export async function getStaticPaths() {
+	const paths = [];
+	for (const locale of SUPPORTED_LOCALES) {
+		for (const series of await getSeriesList(locale)) {
+			paths.push({
+				params: { locale, series },
+				props: {
+					locale,
+					series,
+					posts: await getSeriesPosts(series, locale),
+				},
+			});
+		}
+	}
+	return paths;
+}
+
+const { locale, series, posts } = Astro.props as {
+	locale: Locale;
+	series: string;
+	posts: SeriesEntry[];
+};
+const meta = getSeriesMeta(series, locale);
+const availableLocales = (
+	await Promise.all(
+		SUPPORTED_LOCALES.map(async (candidate) => ({
+			locale: candidate,
+			hasPosts: (await getSeriesPosts(series, candidate)).length > 0,
+		})),
+	)
+).filter((candidate) => candidate.hasPosts);
+const canonicalUrl = new URL(
+	getLocaleUrl(locale, `/series/${series}/`),
+	Astro.site,
+);
+---
+
+<MainGridLayout
+	title={meta.name}
+	description={meta.subtitle}
+	lang={localeLanguageTag(locale)}
+>
+	<link slot="head" rel="canonical" href={canonicalUrl} />
+	{availableLocales.map((candidate) => (
+		<link
+			slot="head"
+			rel="alternate"
+			hreflang={localeLanguageTag(candidate.locale)}
+			href={new URL(
+				getLocaleUrl(candidate.locale, `/series/${series}/`),
+				Astro.site,
+			)}
+		/>
+	))}
+	<link
+		slot="head"
+		rel="alternate"
+		hreflang="x-default"
+		href={new URL(url(`/series/${series}/`), Astro.site)}
+	/>
+	<div
+		class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32"
+		data-pagefind-body
+		data-pagefind-filter={`locale:${locale}`}
+	>
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			<h1 class="text-3xl font-bold text-black/90 dark:text-white/90 mb-1">
+				{meta.name}
+			</h1>
+			{meta.subtitle && (
+				<p class="text-black/60 dark:text-white/60 mb-8">{meta.subtitle}</p>
+			)}
+
+			<ol class="flex flex-col gap-3">
+				{posts.map((post) => {
+					const order = post.data.seriesOrder;
+					const isDraft = post.data.draft === true;
+					return (
+						<li class="transition rounded-[var(--radius-large)] bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[var(--btn-plain-bg-hover)]">
+							<a
+								href={getPostUrlBySlug(post.slug, locale)}
+								class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 px-5 py-4"
+							>
+								{order != null && (
+									<span class="shrink-0 text-sm font-bold tabular-nums text-[var(--primary)] w-6">
+										{String(order).padStart(2, "0")}
+									</span>
+								)}
+								<span class="flex-1 min-w-0">
+									<span class="flex items-center gap-2 flex-wrap">
+										<span class="font-medium text-black/90 dark:text-white/90">
+											{post.data.title}
+										</span>
+										<span
+											class:list={[
+												"text-[0.7rem] uppercase tracking-wide px-1.5 py-0.5 rounded-md",
+												isDraft
+													? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+													: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+											]}
+										>
+											{translate(
+												locale,
+												isDraft
+													? I18nKey.drafting
+													: I18nKey.published,
+											)}
+										</span>
+									</span>
+									{post.data.description && (
+										<span class="block text-sm text-black/50 dark:text-white/50 mt-0.5">
+											{post.data.description}
+										</span>
+									)}
+								</span>
+								<time
+									class="shrink-0 text-sm text-black/40 dark:text-white/40 tabular-nums"
+									datetime={formatDateToYYYYMMDD(post.data.published)}
+								>
+									{formatDateToYYYYMMDD(post.data.published)}
+								</time>
+							</a>
+						</li>
+					);
+				})}
+			</ol>
+
+			{posts.length === 0 && (
+				<p class="text-black/50 dark:text-white/50">
+					{translate(locale, I18nKey.noSeriesPosts)}
+				</p>
+			)}
+		</div>
+	</div>
+</MainGridLayout>

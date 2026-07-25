@@ -81,6 +81,10 @@ function redirect(location: string, extraHeaders?: HeadersInit): Response {
 	return new Response(null, { status: 302, headers });
 }
 
+function withSearch(pathname: string, search: string): string {
+	return `${pathname}${search}`;
+}
+
 function isSafeNextPath(value: string | null): value is string {
 	if (!value || !value.startsWith("/") || value.startsWith("//")) return false;
 	try {
@@ -112,6 +116,7 @@ async function redirectNeutralPost(
 	request: Request,
 	env: Env,
 	pathname: string,
+	search: string,
 ): Promise<Response> {
 	const match = pathname.match(/^\/posts\/(.+?)\/?$/);
 	if (!match) return env.ASSETS.fetch(request);
@@ -126,9 +131,26 @@ async function redirectNeutralPost(
 
 	for (const locale of preferredLocales(request)) {
 		const target = `/${locale}/posts/${translationKey}/`;
-		if (await assetExists(env, request, target)) return redirect(target);
+		if (await assetExists(env, request, target)) {
+			return redirect(withSearch(target, search));
+		}
 	}
 
+	return env.ASSETS.fetch(request);
+}
+
+async function redirectNeutralPage(
+	request: Request,
+	env: Env,
+	pathname: string,
+	search: string,
+): Promise<Response> {
+	for (const locale of preferredLocales(request)) {
+		const target = `/${locale}${pathname}`;
+		if (await assetExists(env, request, target)) {
+			return redirect(withSearch(target, search));
+		}
+	}
 	return env.ASSETS.fetch(request);
 }
 
@@ -151,11 +173,33 @@ export default {
 		}
 
 		if (url.pathname === "/") {
-			return redirect(`/${preferredLocales(request)[0]}/`);
+			return redirect(
+				withSearch(`/${preferredLocales(request)[0]}/`, url.search),
+			);
 		}
 
 		if (url.pathname.startsWith("/posts/")) {
-			return redirectNeutralPost(request, env, url.pathname);
+			return redirectNeutralPost(
+				request,
+				env,
+				url.pathname,
+				url.search,
+			);
+		}
+
+		const neutralPageMatch = url.pathname.match(
+			/^\/(?:archive|about|contact|series)(?:\/[^/]+)?\/?$/,
+		);
+		if (neutralPageMatch) {
+			const canonicalPath = url.pathname.endsWith("/")
+				? url.pathname
+				: `${url.pathname}/`;
+			return redirectNeutralPage(
+				request,
+				env,
+				canonicalPath,
+				url.search,
+			);
 		}
 
 		return env.ASSETS.fetch(request);

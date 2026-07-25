@@ -176,10 +176,17 @@ export type SeriesEntry = {
 // All posts belonging to one series, ordered by seriesOrder (falling back to
 // publication date). Drafts follow the same PROD-hiding rule as the rest of
 // the site, so unpublished entries only appear in dev.
-export async function getSeriesPosts(series: string): Promise<SeriesEntry[]> {
+export async function getSeriesPosts(
+	series: string,
+	locale?: Locale,
+): Promise<SeriesEntry[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
 		const visible = import.meta.env.PROD ? data.draft !== true : true;
-		return visible && data.series === series;
+		return (
+			visible &&
+			data.series === series &&
+			(!locale || normalizeLocale(data.lang) === locale)
+		);
 	});
 
 	const sorted = allBlogPosts.sort((a, b) => {
@@ -196,10 +203,14 @@ export async function getSeriesPosts(series: string): Promise<SeriesEntry[]> {
 }
 
 // Distinct series slugs present across all posts.
-export async function getSeriesList(): Promise<string[]> {
+export async function getSeriesList(locale?: Locale): Promise<string[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
 		const visible = import.meta.env.PROD ? data.draft !== true : true;
-		return visible && !!data.series;
+		return (
+			visible &&
+			!!data.series &&
+			(!locale || normalizeLocale(data.lang) === locale)
+		);
 	});
 	const set = new Set<string>();
 	for (const post of allBlogPosts) set.add(post.data.series);

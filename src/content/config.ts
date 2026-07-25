@@ -29,7 +29,12 @@ const postsCollection = defineCollection({
 	}),
 });
 const specCollection = defineCollection({
-	schema: z.object({}),
+	schema: z.object({
+		lang: z.string().optional().default("en"),
+		translationKey: z.string(),
+		title: z.string(),
+		description: z.string().optional().default(""),
+	}),
 });
 export const collections = {
 	posts: postsCollection,

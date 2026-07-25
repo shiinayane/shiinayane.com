@@ -101,7 +101,16 @@ export default defineConfig({
 		}),
         svelte(),
 		sitemap({
-			filter: (page) => !new URL(page).pathname.startsWith("/posts/"),
+			filter: (page) => {
+				const pathname = new URL(page).pathname;
+				return !(
+					pathname.startsWith("/posts/") ||
+					pathname === "/about/" ||
+					pathname === "/archive/" ||
+					pathname === "/contact/" ||
+					pathname.startsWith("/series/")
+				);
+			},
 		}),
 	],
 	markdown: {

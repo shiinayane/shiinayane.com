@@ -1,0 +1,75 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import LanguageSwitcher from "@components/LanguageSwitcher.astro";
+import Markdown from "@components/misc/Markdown.astro";
+import {
+	localeLanguageTag,
+	normalizeLocale,
+	type Locale,
+} from "@i18n/config";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getLocaleUrl, url } from "@utils/url-utils";
+
+export async function getStaticPaths() {
+	const entries = await getCollection("spec", ({ data }) => {
+		return data.translationKey === "about";
+	});
+	return entries.map((entry) => {
+		const locale = normalizeLocale(entry.data.lang);
+		return { params: { locale }, props: { locale, entry, entries } };
+	});
+}
+
+const { locale, entry, entries } = Astro.props as {
+	locale: Locale;
+	entry: CollectionEntry<"spec">;
+	entries: CollectionEntry<"spec">[];
+};
+const { Content } = await render(entry);
+const localizedUrls = Object.fromEntries(
+	entries.map((candidate) => [
+		normalizeLocale(candidate.data.lang),
+		getLocaleUrl(normalizeLocale(candidate.data.lang), "/about/"),
+	]),
+);
+const canonicalUrl = new URL(getLocaleUrl(locale, "/about/"), Astro.site);
+---
+
+<MainGridLayout
+	title={entry.data.title}
+	description={entry.data.description}
+	lang={localeLanguageTag(locale)}
+>
+	<link slot="head" rel="canonical" href={canonicalUrl} />
+	{entries.map((candidate) => {
+		const candidateLocale = normalizeLocale(candidate.data.lang);
+		return (
+			<link
+				slot="head"
+				rel="alternate"
+				hreflang={localeLanguageTag(candidateLocale)}
+				href={new URL(getLocaleUrl(candidateLocale, "/about/"), Astro.site)}
+			/>
+		);
+	})}
+	<link
+		slot="head"
+		rel="alternate"
+		hreflang="x-default"
+		href={new URL(url("/about/"), Astro.site)}
+	/>
+	<div
+		class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32"
+		data-pagefind-body
+		data-pagefind-filter={`locale:${locale}`}
+	>
+		<div class="card-base z-10 px-9 py-6 relative w-full">
+			<div class="flex justify-end mb-3">
+				<LanguageSwitcher current={locale} urls={localizedUrls} />
+			</div>
+			<Markdown class="mt-2">
+				<Content />
+			</Markdown>
+		</div>
+	</div>
+</MainGridLayout>

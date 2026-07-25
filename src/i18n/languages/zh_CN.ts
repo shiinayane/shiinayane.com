@@ -7,6 +7,13 @@ export const zh_CN: Translation = {
 	[Key.archive]: "归档",
 	[Key.contact]: "联系",
 	[Key.search]: "搜索",
+	[Key.series]: "系列",
+	[Key.article]: "篇文章",
+	[Key.articles]: "篇文章",
+	[Key.noSeries]: "暂无系列。",
+	[Key.noSeriesPosts]: "这个系列暂无文章。",
+	[Key.drafting]: "撰写中",
+	[Key.published]: "已发布",
 
 	[Key.tags]: "标签",
 	[Key.categories]: "分类",

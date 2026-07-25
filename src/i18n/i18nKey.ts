@@ -4,6 +4,13 @@ enum I18nKey {
 	archive = "archive",
 	contact = "contact",
 	search = "search",
+	series = "series",
+	article = "article",
+	articles = "articles",
+	noSeries = "noSeries",
+	noSeriesPosts = "noSeriesPosts",
+	drafting = "drafting",
+	published = "published",
 
 	tags = "tags",
 	categories = "categories",

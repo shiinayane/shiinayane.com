@@ -1,0 +1,110 @@
+---
+import { getSeriesMeta } from "@constants/series";
+import {
+	localeLanguageTag,
+	type Locale,
+	SUPPORTED_LOCALES,
+} from "@i18n/config";
+import I18nKey from "@i18n/i18nKey";
+import { translate } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSeriesList, getSeriesPosts } from "@utils/content-utils";
+import { getLocaleUrl, url } from "@utils/url-utils";
+
+export async function getStaticPaths() {
+	return Promise.all(
+		SUPPORTED_LOCALES.map(async (locale) => {
+			const slugs = await getSeriesList(locale);
+			const series = await Promise.all(
+				slugs.map(async (slug) => ({
+					slug,
+					meta: getSeriesMeta(slug, locale),
+					count: (await getSeriesPosts(slug, locale)).length,
+				})),
+			);
+			series.sort(
+				(a, b) =>
+					b.count - a.count || a.meta.name.localeCompare(b.meta.name),
+			);
+			return { params: { locale }, props: { locale, series } };
+		}),
+	);
+}
+
+const { locale, series } = Astro.props as {
+	locale: Locale;
+	series: Array<{
+		slug: string;
+		meta: ReturnType<typeof getSeriesMeta>;
+		count: number;
+	}>;
+};
+const title = translate(locale, I18nKey.series);
+const canonicalUrl = new URL(getLocaleUrl(locale, "/series/"), Astro.site);
+---
+
+<MainGridLayout title={title} description={title} lang={localeLanguageTag(locale)}>
+	<link slot="head" rel="canonical" href={canonicalUrl} />
+	{SUPPORTED_LOCALES.map((candidate) => (
+		<link
+			slot="head"
+			rel="alternate"
+			hreflang={localeLanguageTag(candidate)}
+			href={new URL(getLocaleUrl(candidate, "/series/"), Astro.site)}
+		/>
+	))}
+	<link
+		slot="head"
+		rel="alternate"
+		hreflang="x-default"
+		href={new URL(url("/series/"), Astro.site)}
+	/>
+	<div
+		class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32"
+		data-pagefind-body
+		data-pagefind-filter={`locale:${locale}`}
+	>
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			<h1 class="text-3xl font-bold text-black/90 dark:text-white/90 mb-6">
+				{title}
+			</h1>
+
+			{series.length === 0 && (
+				<p class="text-black/50 dark:text-white/50">
+					{translate(locale, I18nKey.noSeries)}
+				</p>
+			)}
+
+			<ul class="flex flex-col gap-3">
+				{series.map((item) => (
+					<li class="transition rounded-[var(--radius-large)] bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[var(--btn-plain-bg-hover)]">
+						<a
+							href={getLocaleUrl(locale, `/series/${item.slug}/`)}
+							class="block px-5 py-4"
+						>
+							<span class="flex items-baseline gap-3 flex-wrap">
+								<span class="text-lg font-medium text-black/90 dark:text-white/90">
+									{item.meta.name}
+								</span>
+								<span class="text-sm text-black/40 dark:text-white/40 tabular-nums">
+									{item.count}{" "}
+									{translate(
+										locale,
+										item.count === 1
+											? I18nKey.article
+											: I18nKey.articles,
+									)}
+								</span>
+							</span>
+							{item.meta.subtitle && (
+								<span class="block text-sm text-black/50 dark:text-white/50 mt-1">
+									{item.meta.subtitle}
+								</span>
+							)}
+						</a>
+					</li>
+				))}
+			</ul>
+		</div>
+	</div>
+</MainGridLayout>
