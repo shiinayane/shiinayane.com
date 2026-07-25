@@ -1,7 +1,7 @@
 ---
 title: "One Architecture, Many Languages"
 published: 2026-05-30
-description: "The same four-layer architecture made concrete for Node, Java, Swift, Rust, Go, and Ruby — recommended stack, pitfalls, lockfiles, and gitignore for each."
+description: "A practical reference for applying the same four-layer architecture to Node, Java, Swift, Rust, Go, and Ruby."
 tags: [macos, mise, node, swift, rust, go]
 category: Engineering
 series: "sovereign-tools"
@@ -11,9 +11,9 @@ lang: en
 translationKey: polyglot
 ---
 
-This is the reference chapter. The earlier articles built an architecture and a principle; this one applies them, language by language, so that when you start a project in any of these ecosystems you have a known-good shape to reach for. It is meant to be returned to a section at a time, not read straight through.
+When I start a project in an unfamiliar ecosystem, I want a short answer to four questions: who installs the runtime, who manages packages, which lockfile goes into git, and which generated files stay out. This article collects those answers for Node, Java, Swift, Rust, Go, and Ruby. It is a reference to revisit one section at a time.
 
-Two things carry over and are not re-derived here. From the [manifesto](/posts/manifesto/), the four-layer model:
+The answers use the four layers introduced in the [first article of this series](/posts/manifesto/):
 
 <figure class="my-6">
 <svg viewBox="0 0 600 330" role="img" aria-labelledby="diagram-layers-title-6" style="width:100%;height:auto;color:inherit">
@@ -39,11 +39,11 @@ Two things carry over and are not re-derived here. From the [manifesto](/posts/m
 </svg>
 </figure>
 
-And from the [sovereignty article](/posts/sovereignty/), the rule for who owns **Layer 1 — Runtime version**: if the language ships a strong, official sovereign tool, defer to it; otherwise `mise` fills the gap. Each section below states the verdict and moves on; if a verdict surprises you, that article has the reasoning.
+For **Layer 1 — Runtime version**, I follow the rule from the [sovereignty article](/posts/sovereignty/): use the language's strong official tool when it has one; otherwise, let `mise` do the job. The sections below focus on the resulting setup and the places where it usually goes wrong.
 
 ## Node.js / TypeScript
 
-**Recommended stack.** `mise` owns the Node version (no sovereign tool exists). For the package manager, `pnpm` — but obtained through `corepack` rather than a separate `brew install`, so the `pnpm` version is itself pinned per project:
+`mise` owns the Node version because Node has no sovereign version manager. I use `pnpm` for packages, but enable it through `corepack` rather than adding a separate `brew install`. This lets the `packageManager` field in `package.json` pin the `pnpm` version for the project.
 
 ```toml
 # mise.toml
@@ -58,9 +58,11 @@ node = "22"
 corepack enable      # ships with Node; activates pnpm/yarn shims
 ```
 
-**Key pitfalls.** Do not `brew install node` — that hands Layer 1 to Homebrew and you are back to the rot the [manifesto](/posts/manifesto/) describes. Do not `brew install pnpm` either; let `corepack` pin it from the `packageManager` field in `package.json`, so every contributor gets the same `pnpm`. Node needs no virtual environment: `node_modules` is per-project by construction, so the isolation Python gets from a `.venv` is simply how Node already works. For global command-line tools written for Node, prefer `pnpm dlx` (run once, nothing installed) or a deliberate `PNPM_HOME` on `PATH` over a sprawl of `npm install -g`.
+Avoid both `brew install node` and `brew install pnpm`. The first makes Homebrew the owner of Layer 1; the second bypasses the project's package-manager pin. Node does not need a separate virtual environment: `node_modules` is already local to the project, providing the isolation for which Python uses `.venv`.
 
-**Lockfile and gitignore.** Commit `pnpm-lock.yaml`. Ignore the rest:
+For Node-based command-line tools, I normally use `pnpm dlx` when I only need to run something once. If a tool must be installed, I keep a deliberate `PNPM_HOME` on `PATH` instead of accumulating an uncontrolled set of `npm install -g` packages.
+
+Commit `pnpm-lock.yaml`, and ignore:
 
 ```text
 node_modules/
@@ -71,7 +73,7 @@ dist/
 
 ## Java
 
-**Recommended stack.** `mise` owns the JDK (no sovereign tool, and "Java" is many distributions). Default to Temurin, which is a neutral, well-maintained build:
+Java has no single sovereign version tool, and the JDK itself comes in several distributions. I let `mise` install Temurin, a neutral and well-maintained default:
 
 ```toml
 # mise.toml
@@ -79,9 +81,18 @@ dist/
 java = "temurin-21"
 ```
 
-**Key pitfalls.** Confirm `mise` is actually setting `JAVA_HOME` — many Java tools read it directly rather than finding `java` on `PATH`, and a stale `JAVA_HOME` from an old install will quietly win. `mise where java` and `echo $JAVA_HOME` should agree. For builds, prefer the project's wrapper — `./gradlew` or `./mvnw` — over a globally installed Gradle or Maven; the wrapper pins the build-tool version in the repo, which is the Layer-3 discipline applied to the build tool itself. Android development is its own sovereign world: Android Studio bundles its own JDK and SDK, and you let it, the same way you let Xcode own Swift.
+Check that `mise` is setting `JAVA_HOME`, not merely putting `java` on `PATH`. Many Java tools read `JAVA_HOME` directly, so an old value can silently override the JDK you meant to use. `mise where java` and `echo $JAVA_HOME` should point to the same installation:
 
-**Lockfile and gitignore.** Gradle and Maven express dependencies declaratively in build files; commit those and the wrapper. Ignore build output:
+```bash
+mise where java
+echo $JAVA_HOME
+```
+
+For the build tool, use the wrapper committed by the project—`./gradlew` or `./mvnw`—rather than a global Gradle or Maven. The wrapper pins the build-tool version in the repository, applying the same Layer 3 discipline beyond ordinary dependencies.
+
+Android is a separate case. Android Studio brings its own JDK and SDK, so I let it own that environment just as Xcode owns Swift.
+
+Gradle and Maven declare dependencies in their build files. Commit those files and the wrapper, then ignore the build output:
 
 ```text
 .gradle/
@@ -91,13 +102,13 @@ target/
 
 ## Swift / iOS
 
-**Recommended stack.** Xcode is the sovereign tool, and it spans **Layer 0 — System** and **Layer 1 — Runtime version** at once: it is the toolchain, the SDK, and the build system, installed from the Mac App Store (which is why the [apps article](/posts/apps/) routes it through `mas`). For dependencies, prefer Swift Package Manager over CocoaPods.
+Xcode is Swift's sovereign tool on macOS. It covers **Layer 0 — System** and **Layer 1 — Runtime version** together: toolchain, SDK, and build system all arrive as one application. I install it from the Mac App Store, which is why the [apps article](/posts/apps/) routes Xcode through `mas`, and prefer Swift Package Manager for dependencies.
 
-**Key pitfalls.** Never `brew install swift`. On macOS that fights Xcode for ownership of the toolchain, and Xcode wins in confusing ways. Reaching for CocoaPods drags in a Ruby dependency you mostly do not need anymore (more on that under Ruby). SPM keeps the whole thing inside the Apple toolchain.
+Do not `brew install swift` on macOS. It creates a second claimant for the toolchain while Xcode still wins in less obvious parts of the build. CocoaPods also adds a Ruby dependency that most new projects no longer need; when SPM supports the packages involved, it keeps dependency management inside the Apple toolchain.
 
-There is a clean-boundary pattern worth calling out here. In one of my projects, KotobaLab (Swift) and its companion DictionaryBuilder (Python) do not share a runtime, a package manager, or a build system at all. They meet through a single SQLite file — a neutral interface. The Swift side reads a database; the Python side writes one. Neither language's tooling has to know the other exists. When two ecosystems must cooperate, a neutral data interface like this is far cleaner than trying to make one language's toolchain reach into the other's.
+One of my projects has a boundary that has worked particularly well: KotobaLab is written in Swift, while its companion DictionaryBuilder is written in Python. They do not share a runtime, package manager, or build system. DictionaryBuilder writes a SQLite file and KotobaLab reads it. That neutral data interface lets both toolchains remain independent instead of making either ecosystem reach inside the other.
 
-**Lockfile and gitignore.** Commit `Package.resolved` (SPM's lockfile). Ignore the per-user and build artifacts:
+Commit `Package.resolved`, SPM's lockfile. Ignore the per-user and build artifacts:
 
 ```text
 xcuserdata/
@@ -108,18 +119,18 @@ DerivedData/
 
 ## Rust
 
-**Recommended stack.** `rustup` is the sovereign tool and owns Layer 1; `cargo` is Layer 2 and ships with it. This is the simplest ecosystem in the series because one tool covers building, testing, dependency management, and publishing:
+Rust has the cleanest ownership model in this group. `rustup` owns Layer 1, while `cargo`, shipped with it, handles Layer 2 as well as building, testing, dependency management, and publishing.
 
 ```bash
 # rustup installs the toolchain; cargo comes with it
 rustup default stable
 ```
 
-In a polyglot project that already has a `mise.toml`, you may instead write `rust = "1.78"` there and let `mise` proxy to `rustup` — the **mise as proxy** pattern from the [sovereignty article](/posts/sovereignty/). Either is fine; just don't manage one project's Rust through both.
+If a polyglot repository already has a `mise.toml`, it can instead contain `rust = "1.78"` and let `mise` proxy to `rustup`. This is the **mise as proxy** arrangement described in the [sovereignty article](/posts/sovereignty/). Both setups work; do not use both to manage the same project's Rust version.
 
-**Key pitfalls.** There is no virtual-environment concept and you do not need one — Cargo handles per-project dependencies natively. For *global* command-line tools that happen to be written in Rust (`ripgrep`, `fd`, `bat`), prefer the `brew` formula over `cargo install`: Homebrew ships a prebuilt binary, while `cargo install` compiles from source, which is slower and pointless for a tool you just want to use. Save `cargo install` for tools not yet packaged.
+Cargo already keeps dependencies per project, so Rust has no need for a virtual environment. For global command-line tools written in Rust, such as `ripgrep`, `fd`, and `bat`, I prefer the `brew` formula. It provides a prebuilt binary, whereas `cargo install` compiles the tool from source. I reserve `cargo install` for tools that have not been packaged yet.
 
-**Lockfile and gitignore.** Commit `Cargo.lock` for applications (binaries); the long-standing convention is to omit it for libraries so downstream consumers resolve their own versions. Ignore the build directory:
+Commit `Cargo.lock` for applications and binaries. The long-standing convention for libraries is to omit it so downstream users resolve their own versions. Ignore:
 
 ```text
 /target/
@@ -127,7 +138,7 @@ In a polyglot project that already has a `mise.toml`, you may instead write `rus
 
 ## Go
 
-**Recommended stack.** Go's official `dl` installer is weak, so `mise` is comfortable owning Go's version, and most people are happy there:
+Go's official `dl` installer is not a strong version manager, so I am comfortable letting `mise` own the Go version:
 
 ```toml
 # mise.toml
@@ -135,18 +146,20 @@ In a polyglot project that already has a `mise.toml`, you may instead write `rus
 go = "1.23"
 ```
 
-**Key pitfalls.** Forget `GOPATH` exists — modern Go uses modules, and a project anywhere on disk works without the old workspace layout. Do set `GOBIN` so that `go install` puts binaries somewhere you control and have on `PATH`; I point it at `~/.local/bin`, the same directory the [Python article](/posts/python/) uses for personal scripts:
+Modern Go uses modules, so projects no longer need the old `GOPATH` workspace layout and can live anywhere on disk. I do set `GOBIN`, however, so `go install` writes executables to a directory I control and already have on `PATH`. I use `~/.local/bin`, the same location as personal scripts in the [Python article](/posts/python/):
 
 ```zsh
 # 00-env.zsh
 export GOBIN="$HOME/.local/bin"
 ```
 
-**Lockfile and gitignore.** `go.mod` declares dependencies and `go.sum` pins their checksums; commit both. Go projects produce few stray artifacts; ignore your built binaries by name or by an output directory.
+Commit both `go.mod`, which declares dependencies, and `go.sum`, which pins their checksums. Go leaves few incidental files in a repository; ignore compiled binaries by name or put them in an ignored output directory.
 
 ## Ruby
 
-**Recommended stack.** No sovereign tool, so `mise` fills the gap — but the more useful advice is to question whether you need Ruby at all. Never use the system Ruby that ships with macOS; it is old, Apple discourages touching it, and `sudo gem install` against it is a classic way to corrupt a machine. Reach for `mise` only when a project actually requires Ruby.
+Ruby has no sovereign version tool, so `mise` can own Layer 1. I only install it when a project actually requires Ruby.
+
+Never use the system Ruby included with macOS for project dependencies. It is old, Apple discourages modifying it, and `sudo gem install` against it is a reliable way to damage the system environment.
 
 ```toml
 # mise.toml — only when a project genuinely needs it
@@ -154,19 +167,20 @@ export GOBIN="$HOME/.local/bin"
 ruby = "3.3"
 ```
 
-**Key pitfalls.** The most common reason developers install Ruby on macOS is CocoaPods, and as noted under Swift, SPM has largely removed that need. If you can use SPM, you can skip Ruby entirely. This connects to a habit the [maintenance article](/posts/maintenance/) makes central: install on demand, not preemptively. An old system Ruby is not a reason to rush a `mise`-managed Ruby onto a machine that has no Ruby projects on it.
+CocoaPods is still a common reason for macOS developers to install Ruby, but SPM has removed that requirement from many Swift projects. If SPM covers the project, Ruby can stay uninstalled. This follows the on-demand approach from the [maintenance article](/posts/maintenance/): the presence of an old system Ruby does not require adding a `mise`-managed Ruby to a machine with no Ruby projects.
 
-**Lockfile and gitignore.** When you do use Ruby, commit `Gemfile.lock`. Ignore the local bundle path if you set one (e.g. `vendor/bundle/`).
+When Ruby is necessary, commit `Gemfile.lock`. If Bundler uses a local path such as `vendor/bundle/`, ignore that directory.
 
-## The cross-language rules
+## What stays consistent across languages
 
-Underneath the per-language specifics, the same handful of rules hold everywhere, and they are worth stating as a checklist:
+A repository should declare its runtime rather than relying on a contributor's global default. Check in `mise.toml` or `.tool-versions`, and a fresh clone can provision the required versions with `mise install`. Global defaults are still useful for scratch work.
 
-- **Project-level declaration beats global default.** A `mise.toml` (or `.tool-versions`) checked into the repo means the project carries its own runtime versions, so a fresh clone provisions correctly with `mise install`. A global default is a fallback for scratch work, not the thing projects should rely on.
-- **Lockfiles belong in git; build artifacts do not.** `pnpm-lock.yaml`, `Cargo.lock`, `go.sum`, `Package.resolved`, `uv.lock`, `Gemfile.lock` — these are the reproducible truth of Layer 3 and must travel with the repo. `node_modules`, `target/`, `DerivedData/`, `.venv`, and friends are derived and belong in `.gitignore`.
-- **One `mise.toml` can manage several languages.** A polyglot project does not need one config per language; a single `mise.toml` listing `node`, `python`, and `go` together provisions the whole thing with one command. This is the unified-interface convenience that makes `mise` worth using even alongside sovereign tools.
-- **Do not double-declare the same fact across layers.** This one is subtle. In Python, `requires-python` in `pyproject.toml` expresses a *range* the code supports; `mise.toml` expresses the *one version* this machine will use. They are different statements and should not be collapsed. Declaring the same thing in two places means two sources of truth for one fact, which is the original sin the whole series is about.
+Lockfiles belong in git; derived artifacts do not. That means committing `pnpm-lock.yaml`, `Cargo.lock`, `go.sum`, `Package.resolved`, `uv.lock`, and `Gemfile.lock`, while keeping `node_modules`, `target/`, `DerivedData/`, `.venv`, and similar output in `.gitignore`.
 
-A closing caveat, because the architecture is not universal. C and C++ have no clean version-management story of the kind this series assumes — there is no `mise`-shaped owner of "the C version", and system compilers, SDKs, and a tangle of build systems make the layering blurry. My default is to not try to impose it: I do not manage C/C++ toolchains directly, and when they show up as a dependency of something else (a native extension, a build requirement), I let the upper-layer tool that pulled them in deal with them. Knowing where the model stops is part of using it well.
+One `mise.toml` can list `node`, `python`, and `go` together. A polyglot project does not need a separate runtime configuration for every language, and the whole toolset can be provisioned with one command. This unified interface remains useful even when `mise` delegates to a sovereign tool.
 
-That is the architecture made concrete. The [final article](/posts/maintenance/) turns from setup to upkeep — because, as it argues, configuring all of this is the easy part.
+The same fact should not be declared twice, but superficially similar declarations may have different jobs. In Python, `requires-python` in `pyproject.toml` describes the range supported by the code. `mise.toml` selects the one version used on the current machine. Keeping both is not duplication; collapsing them would lose information. Actual duplication creates two sources of truth, which is the failure the [first article](/posts/manifesto/) set out to avoid.
+
+There is also a hard limit to this model. C and C++ have no comparable owner for “the C version.” System compilers, SDKs, and multiple build systems blur the layers. I do not try to force these toolchains into the same shape. When C or C++ appears as a native extension or build dependency, I let the higher-level tool that introduced it handle the requirement.
+
+The [final article in the series](/posts/maintenance/) covers what happens after this setup: keeping the environment usable without turning maintenance into another project.

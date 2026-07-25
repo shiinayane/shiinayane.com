@@ -8,11 +8,11 @@ lang: en
 translationKey: deploy-minecraft-server-with-docker
 ---
 
-Recently, I wanted to start a Minecraft server on my Mac. It’s quite simple to run `./run.bash` in the server directory, but obviously not elegant enough since you have to keep the terminal and Java interface running in the background. Besides, though, Screen can hide the terminal, but it has no idea of the Java service.  
+Recently, I wanted to start a Minecraft server on my Mac. It’s quite simple to run `./run.bash` in the server directory, but obviously not elegant enough since you have to keep the terminal and Java process running in the background. Screen can hide the terminal, but it has no idea about the Java service itself.
   
-We all know that Docker is a powerful tool to deploy any complicated image on every single device. Therefore, I wondered if I could take full advantage of Docker in part of the Minecraft server.  
+Docker is a powerful tool for deploying complicated services on almost any device. So I wondered if I could use Docker for the Minecraft server too.
   
-And luckily, we have itzg/minecraft-server!  
+And luckily, we have `itzg/minecraft-server`!
   
 ## Intro
 
@@ -20,7 +20,7 @@ The GitHub link:
 
 ::github{repo="itzg/docker-minecraft-server"}
 
-Some simple intro from its doc ([https://docker-minecraft-server.readthedocs.io/en/latest/](https://docker-minecraft-server.readthedocs.io/en/latest/)):  
+Here is a simple introduction from its [documentation](https://docker-minecraft-server.readthedocs.io/en/latest/):
   
 > This docker image provides a Minecraft Server that will automatically download the latest stable version at startup. You can also run/upgrade to any specific version or the latest snapshot. See the Versions section below for more information.  
 >
@@ -32,10 +32,11 @@ docker run -d -it -p 25565:25565 -e EULA=TRUE itzg/minecraft-server
 
 > where, in this case, the standard server port 25565 will be exposed on your host machine.  
   
-## Docker compose
+## Docker Compose
 
-I do not recommend you to directly run this image with the command above. Instead, Docker compose is the best method like other usual projects.  
-Here are the official instructions.  
+I do not recommend running the image directly with the command above. Docker Compose is a better method, just like for other usual projects.
+
+Here are the official instructions.
   
 > 1. Create a new directory  
 >
@@ -64,9 +65,9 @@ services:
 
 > To apply changes made to the compose file, just run `docker compose up -d` again.  
 >
-> Follow the logs of the container using `docker compose logs -f`, check on the status with docker compose ps, and stop the container using docker compose stop.  
+> Follow the logs of the container using `docker compose logs -f`, check on the status with `docker compose ps`, and stop the container using `docker compose stop`.
   
-If you are a beginner of Docker, you may be confused about the volumes. Well, it’s actually quite simple; you can look at one possible structure below.  
+If you are new to Docker, volumes may be a little confusing. Well, they are actually quite simple. One possible directory structure looks like this:
   
 ```plain
 Your-MC-Server-Folder
@@ -80,11 +81,11 @@ Your-MC-Server-Folder
 └── docker-compose.yml
 ```
   
-Obviously, the `/data` folder inside `/Your-MC-Server-Folder` is the place where you need to put all the mods and world into. Of course, you can use docker compose command to let docker generate these data by itself. Also, you could just move your existing data into the `/data`.
+The `data` folder inside `Your-MC-Server-Folder` is where you put all the mods and world data. Of course, you can also run Docker Compose first and let the container generate the data by itself, or just move your existing data into `data`.
   
-## Loader and Mod
+## Loader and mods
 
-Starting a modded server is also possible by just changing the variables in the `compose.yaml`. I will show you my own one. You can use this website [https://setupmc.com/java-server/](https://setupmc.com/java-server/) to assist you in generating your own config.  
+Starting a modded server is also possible by changing the variables in `compose.yaml`. Here is my own configuration. You can use [SetupMC](https://setupmc.com/java-server/) to help generate yours.
   
 ```yaml
 services:
@@ -109,7 +110,7 @@ services:
 
 ```
 
-Btw, port open to 24454 due to the mod ‘Simple Voice Chat’. In this situation, you also need to change the ip to `0.0.0.0` in the Simple Voice Chat config.  
+Btw, port `24454/udp` is open because of the mod “Simple Voice Chat.” In this situation, you also need to change the IP to `0.0.0.0` in the Simple Voice Chat config.
   
 ## And…
 

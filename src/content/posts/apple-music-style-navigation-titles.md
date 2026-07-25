@@ -1,5 +1,5 @@
 ---
-title: Recreating Apple Music–Style Collapsing Navigation Titles in SwiftUI
+title: Recreating Apple Music’s Disappearing Navigation Title in SwiftUI
 published: 2026-04-03
 tags: [SwiftUI, iOS, UI]
 category: Engineering
@@ -8,13 +8,11 @@ lang: en
 translationKey: apple-music-style-navigation-titles
 ---
 
-In the iOS 26, some system apps like Apple Music introduced a subtle UI pattern: **the navigation title and toolbar area disappear completely when scrolling.**
-
-This is different from the classic **large-title collapse behavior** that has existed since iOS 11.
+In Apple Music on iOS 26, scrolling can make the large navigation title and its toolbar content disappear. It does not follow the large-title behavior that iOS has used since iOS 11.
 
 ![example in Apple Music](./assets/apple-music-style-navigation-titles/navigation-title-collapse.png)
 
-Traditional behavior:
+The usual transition is:
 
 ```plain
 Large Title
@@ -22,7 +20,7 @@ Large Title
 Small Navigation Title
 ```
 
-New behavior seen in Apple Music:
+Apple Music instead looks more like this:
 
 ```plain
 Large Title
@@ -30,22 +28,18 @@ Large Title
 (no title)
 ```
 
-The entire header area visually disappears, leaving more room for content.
+There is no public SwiftUI modifier dedicated to this interaction. Depending on how closely the result needs to match, I would use one of two implementations: build a custom header and control it from the scroll position, or hide only the compact title with an empty principal toolbar item.
 
-Naturally, many developers started looking for a SwiftUI modifier that enables this behavior.
+## The controllable version: own the header
 
-At the moment, however, there is no public SwiftUI API that directly exposes this interaction.
+A full implementation can combine:
 
-## How Apple Might Be Implementing This
+- a custom top header inserted with `safeAreaInset(edge: .top)`
+- scroll detection through `ScrollGeometry`
+- separate visibility rules for the title and other toolbar items
+- opacity and offset animations
 
-From observing system apps and experimenting with SwiftUI, the effect likely relies on a combination of:
-
-- Custom top headers inserted via `safeAreaInset(edge: .top)`
-- Scroll detection using `ScrollGeometry`
-- Separate visibility logic for different toolbar elements
-- Animated opacity / offset transitions
-
-SwiftUI already provides pieces that could support this architecture:
+SwiftUI already exposes the pieces:
 
 ```swift
 .onScrollGeometryChange(...)
@@ -53,15 +47,7 @@ SwiftUI already provides pieces that could support this architecture:
 .toolbar(...)
 ```
 
-But these are **low-level building** blocks, not a dedicated modifier.
-
-For example, if you wanted to recreate the behavior in a robust way, you could do something like this.
-
-## A Proper Implementation Approach
-
-The most flexible way is to track the scroll position and adjust the header visibility.
-
-A simplified version might look like this:
+They are building blocks rather than one navigation-bar option. A minimal version can track the vertical content offset and hide the header after a threshold:
 
 ```swift
 struct CollapsingHeaderView: View {
@@ -105,32 +91,13 @@ struct CollapsingHeaderView: View {
 }
 ```
 
-This approach has a few advantages:
+This works with content built from `ScrollView`, `List`, or `LazyVStack`, and the header can contain any layout or transition the screen needs. The hiding threshold is also under the app’s control.
 
-- Works with `ScrollView`, `List`, or `LazyVStack`
-- Allows fully custom header layouts
-- Gives precise control over when the header hides
-- Supports animations and complex transitions
+The tradeoff is that the app now owns the behavior, including scroll direction, toolbar layout, refresh interactions, and nested navigation-stack edge cases. That is reasonable for a screen that needs a precise result, but excessive if the only goal is to remove the compact title.
 
-It also reflects how many developers believe Apple internally structures similar UI patterns.
+## The small shortcut: empty the compact title
 
-However, this approach comes with a downside: **you now own the scroll logic.**
-
-That means managing:
-
-- scroll thresholds
-- scroll direction
-- toolbar layout
-- edge cases with refreshable
-- nested navigation stacks
-
-For some apps this is perfectly fine, but it may feel heavy for simple layouts.
-
-## A Surprisingly Simple Trick
-
-While experimenting with SwiftUI navigation bars, I discovered a much simpler trick.
-
-If you add an empty principal toolbar title, the collapsed navigation title becomes invisible.
+For the lighter version, place an empty view in the principal toolbar position:
 
 ```swift
 .toolbar {
@@ -140,14 +107,14 @@ If you add an empty principal toolbar title, the collapsed navigation title beco
 }
 ```
 
-Used together with a large navigation title:
+Keep the normal large title:
 
 ```swift
 .navigationTitle("Library")
 .navigationBarTitleDisplayMode(.large)
 ```
 
-the visual behavior becomes:
+The resulting transition is:
 
 ```plain
 Large Title
@@ -155,9 +122,7 @@ Large Title
 (empty)
 ```
 
-In other words, the collapsed title still exists — it just renders nothing.
-
-Example:
+The large title still appears at the top of the list. Once it collapses, the principal item supplies an empty compact title:
 
 ```swift
 NavigationStack {
@@ -174,11 +139,11 @@ NavigationStack {
 }
 ```
 
-This produces a surprisingly convincing effect that resembles the Apple Music collapsing header.
+This is enough to make a standard `NavigationStack` resemble Apple Music without introducing scroll state.
 
-## Why This Works
+## What the shortcut actually changes
 
-SwiftUI navigation bars internally transition between two states:
+SwiftUI normally transitions between these title states:
 
 ```plain
 Large Navigation Title
@@ -186,9 +151,7 @@ Large Navigation Title
 Compact Navigation Title
 ```
 
-By replacing the compact title with an empty view, the collapsed state effectively becomes invisible.
-
-So instead of seeing:
+The principal toolbar item replaces the content shown in the compact position. Making that item empty changes the visible result from:
 
 ```plain
 Large Title
@@ -196,7 +159,7 @@ Large Title
 Small Title
 ```
 
-you get:
+to:
 
 ```plain
 Large Title
@@ -204,45 +167,30 @@ Large Title
 (blank space)
 ```
 
-The navigation bar itself still exists, but visually it looks like the header disappeared.
+The navigation bar has not been removed. Its compact title simply renders no content, which is why the effect looks convincing while requiring almost no code.
 
-## Limitations
+That distinction also defines the limits of the trick:
 
-This trick works because of how SwiftUI currently renders navigation titles, but it has a few caveats:
+- the navigation bar still exists
+- other toolbar items may continue to occupy space
+- the result depends on current SwiftUI rendering behavior and may change in a future release
 
-- The navigation bar is still present.
-- Toolbar items may still occupy layout space.
-- It relies on current SwiftUI behavior and could change in future versions.
+If the whole header and its layout must disappear, the custom scroll-driven version is the appropriate one. If an empty compact title is visually sufficient, the toolbar shortcut is much cheaper.
 
-In other words, this is a visual shortcut, not a full re-implementation of the Apple Music UI.
+## An official API may eventually replace both
 
-## Will Apple Provide an Official API?
+Apple has introduced UI behavior in system apps before exposing related public APIs. `.searchable`, large navigation titles, and the tab-bar minimization behavior shown in Apple Music followed that general pattern.
 
-Possibly.
-
-Apple often ships new UI patterns in system apps first and exposes them publicly later.
-
-Examples include:
-
-- `.searchable`
-- large navigation titles
-- tab bar minimization behavior (as shown in Apple Music)
-
-So it would not be surprising if a future SwiftUI release introduced something like:
+A future SwiftUI API could conceivably look like:
 
 ```swift
 .navigationBarCollapseBehavior(.onScroll)
 ```
 
-or
+or:
 
 ```swift
 .toolbarScrollVisibility(.hidden)
 ```
 
-Until then, developers can either:
-
-1. Implement a custom collapsing header with scroll detection
-2. Use the small toolbar trick above for a lightweight approximation
-
-Both approaches can achieve a very similar user experience.
+Those modifiers are only illustrative; SwiftUI does not currently provide them.

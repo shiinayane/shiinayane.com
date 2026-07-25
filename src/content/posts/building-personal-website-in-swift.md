@@ -9,25 +9,9 @@ lang: en
 translationKey: building-personal-website-in-swift
 ---
 
-## Introduction
+While building this site with Raptor, I needed distinct styles for post dates, navigation labels, tags, and other small pieces of text. I expected this to be a minor theme change. Instead, I ended up modifying the framework before realizing that I was working in the wrong layer.
 
-I recently started building my personal website using Swift.
-
-**Not JavaScript. Not Hugo. Not a typical static site generator.**
-
-Instead, I chose a Swift-based SSG called Raptor. The idea was simple: if I already write Swift every day, why not use it for my website too?
-
-At first, everything felt surprisingly smooth. Writing layouts in Swift felt expressive, type-safe, and honestly… kind of fun.
-
-But then I ran into a problem I didn’t expect.
-
-And that problem turned out to be much deeper than I thought.
-
-## What is Raptor?
-
-Before going further, a quick explanation.
-
-Raptor is a static site generator written in Swift. Instead of writing HTML templates or JSX, you describe your site using Swift code:
+Raptor is a static site generator written in Swift. Its layouts use Swift rather than HTML templates or JSX:
 
 ```swift
 VStack {
@@ -36,36 +20,29 @@ VStack {
 }
 ```
 
-It also has a built-in theme system, where you can define typography and colors:
+It also provides a theme system for typography and colors:
 
 ```swift
 .font(.title1)
 .fontSize(36, for: .title1)
 ```
 
-So far, so good.
+That felt expressive and type-safe, and using Swift for a site was genuinely fun. The trouble started when the design needed more than the built-in text roles.
 
-## The Problem: Real-World Themes Are Messy
+## The roles missing from a real site
 
-When you build a real website (not just a demo), you quickly realize something:
+Raptor's typography system has a fixed set of roles:
 
-Not all text is just “title” or “body”.
+- body
+- title1 … title6
+- codeBlock
 
-You also have things like:
-
-- post metadata (dates, authors)
-- navigation labels
-- tags and categories
-- small UI text like buttons or links
-
-In traditional static site generators (like Hugo or Hexo), this is trivial:
+A real site also has post metadata, navigation labels, tags, categories, buttons, and links. In Hugo, Hexo, or a hand-written template, I would give those elements class names and move on:
 
 ```html
 <span class="post-meta">April 20</span>
 <a class="nav-label">Archive</a>
 ```
-
-And then in CSS:
 
 ```css
 .post-meta {
@@ -77,43 +54,31 @@ And then in CSS:
 }
 ```
 
-You just invent class names and move on.
-
-## Why This Felt Hard in Swift
-
-In Raptor, typography is built around a fixed set of roles:
-
-- body
-- title1 … title6
-- codeBlock
-
-But there’s no built-in way to express:
+Raptor had no equivalent built-in roles for:
 
 ```swift
 .postMeta
 .navLabel
 ```
 
-So I started thinking:
+My first reaction was to add them.
 
-“Why can’t I define my own text roles?”
+## Extending Theme
 
-## My First Idea: Extend the Theme System
-
-I tried adding a custom concept like this:
+I designed an API that looked like this:
 
 ```swift
 Text("April 20").textRole(.postMeta)
 ```
 
-And in the theme:
+The theme would configure each custom role:
 
 ```swift
 .fontSize(12, for: .postMeta)
 .fontWeight(.medium, for: .postMeta)
 ```
 
-Then generate CSS like:
+Raptor would then generate:
 
 ```css
 .text-role-post-meta {
@@ -122,142 +87,65 @@ Then generate CSS like:
 }
 ```
 
-And attach it to HTML:
+and attach the class to the rendered HTML:
 
 ```html
 <p class="text-role-post-meta">April 20</p>
 ```
 
-## It Worked… Technically
+After digging through the framework, I modified the theme configuration, updated CSS generation, and patched the rendering logic. The implementation worked: custom roles went through the theme system, supported light and dark mode, generated CSS automatically, and appeared in the final HTML.
 
-After quite a bit of digging into the framework:
+The code was functional, but the model still felt wrong.
 
-- modifying theme configuration
-- updating CSS generation
-- patching rendering logic
+First, it created two competing ways to describe text:
 
-I actually got it working.
+```swift
+.font(.title1)        // built-in
+.textRole(.postMeta)  // custom
+```
 
-Custom text roles could:
+Second, the two APIs did not carry the same meaning. In Raptor:
 
-- go through the theme system
-- support light/dark mode
-- generate CSS automatically
-- appear in HTML
+```swift
+.font(.title1)
+```
 
-So… problem solved?
+selects an HTML tag such as `<h1>` and applies its styling. My custom API:
 
-Not really.
+```swift
+.textRole(.navLabel)
+```
 
-## Something Felt Off
+only applied styling. HTML structure and visual style are separate concerns, but I had added another typography API without resolving that distinction.
 
-Even though it worked, the system started to feel… weird.
+Eventually I was writing:
 
-Here’s why.
+```swift
+.tag(.h1)
+.textRole(.navLabel)
+```
 
-1. **Two Competing Systems**
+which was just a more elaborate way to express:
 
-    Now I had:
+```html
+<h1 class="nav-label"></h1>
+```
 
-    ```swift
-    .font(.title1)        // built-in
-    .textRole(.postMeta)  // custom
-    ```
+The type-safe API was no longer removing complexity. It was recreating HTML concepts with extra steps.
 
-    Two ways to describe text.
+## The abstraction was already there
 
-    That’s already a smell.
-
-2. **Tag vs Style Confusion**
-
-    In Raptor:
-
-    ```swift
-    .font(.title1)
-    ```
-
-    does two things:
-
-    - decides the HTML tag (`<h1>`)
-    - applies styling
-
-    But in my system:
-
-    ```swift
-    .textRole(.navLabel)
-    ```
-
-    only affects styling.
-
-    That made me realize:
-
-    HTML tag and text style are actually two different things.
-
-    But the framework treats them as one.
-
-3. **It Started to Feel Like Writing HTML Anyway**
-
-    At some point I found myself writing things like:
-
-    ```swift
-    .tag(.h1)
-    .textRole(.navLabel)
-    ```
-
-    Which is basically:
-
-    ```html
-    <h1 class="nav-label"></h1>
-    ```
-
-    At that moment I had a thought:
-
-    “Wait… am I just reinventing HTML with extra steps?”
-
-## Looking at Other Tools
-
-I checked how other SSGs handle this.
-
-Hugo, for example (written in Go), does not solve this problem at the framework level.
-
-It simply lets you write:
+I checked other static site generators to see whether they modeled this problem at the framework level. Hugo, for example, simply allows:
 
 ```html
 <p class="post-meta"></p>
 ```
 
-and handle everything in CSS.
+and leaves the rest to CSS.
 
-No type system. No abstraction. Just freedom.
+That comparison sent me back into Raptor's design and source code. Theme is meant for global design tokens such as typography, colors, and spacing. A semantic style like “post metadata” does not need to become another global text role.
 
-## So… What’s the Real Problem?
-
-The problem is not “we need a unified role system”.
-
-The real problem is:
-
-**I was trying to solve this in the wrong layer.**
-
-After digging deeper into Raptor’s design (and even its source code), I realized something important:
-
-- Theme is designed for **global design tokens** (typography, colors, spacing)
-- But **semantic styles are not meant to live in Theme**
-
-Instead, Raptor already provides a dedicated abstraction for this:
-
-> **Style**
-
-And I had completely overlooked it.
-
-## The Actual Solution (That I Missed)
-
-It turns out Raptor already has the right abstraction for this problem.
-
-Not `textRole`.
-
-Not extending Theme.
-
-But this:
+Raptor already has a separate abstraction for that: `Style`.
 
 ```swift
 struct PostMetaStyle: Style {
@@ -269,31 +157,22 @@ struct PostMetaStyle: Style {
 }
 ```
 
-And then:
+It can be applied directly to the content:
 
 ```swift
 Text("April 20")
     .style(PostMetaStyle())
 ```
 
-That’s it.
-
-This is effectively:
+This serves the same purpose as:
 
 ```html
 <p class="post-meta">April 20</p>
 ```
 
-But expressed in a reusable, composable, and type-safe way.
+but keeps the implementation reusable, composable, and type-safe.
 
-Even better, `Style` can access environment conditions:
-
-- light / dark mode
-- active theme
-- contrast settings
-- layout conditions
-
-Which means you can write:
+`Style` also receives environment conditions, including the light or dark color scheme, active theme, contrast settings, and layout conditions. A semantic style can therefore adapt without becoming part of the theme's role system:
 
 ```swift
 struct PostMetaStyle: Style {
@@ -307,65 +186,4 @@ struct PostMetaStyle: Style {
 }
 ```
 
-So instead of:
-
-- trying to extend Theme
-- or inventing a new role system
-
-The intended model is:
-
-- **Theme → defines global tokens**
-- **Style → defines reusable semantic styles**
-
-In other words, Raptor already supports exactly what I wanted — just not in the place I was looking.
-
-## What I Learned
-
-This little experiment taught me a few things:
-
-1. **“Elegant” abstractions can be misleading**
-
-    A unified system looks great on paper, but may not fit the existing architecture.
-
-2. **Not everything needs to be in the type system**
-
-    Traditional SSGs work fine by leaving some flexibility to CSS.
-
-    Trying to encode everything in Swift may not always be worth it.
-
-3. **The real challenge is understanding the abstraction boundary**
-
-    The key isn’t:
-
-    “How do I define more roles?”
-
-    But:
-
-    **“Which layer should own semantic styles?”**
-
-    In Raptor’s case, the answer is:
-
-    - Theme → tokens
-    - Style → semantics
-
-## Closing Thoughts
-
-I started this thinking:
-
-“I just need a way to define custom text styles.”
-
-And ended up questioning:
-
-The most surprising part?
-
-The framework already had the answer.
-
-I just didn’t understand it yet.
-
-- how theme systems should be designed
-- how much abstraction is too much
-- and where Swift should (and shouldn’t) replace CSS
-
-I’m still building my site in Swift — and I still like it.
-
-But now I have a much clearer idea of where the real complexity lies.
+The boundary I had missed was simple: Theme defines global tokens; `Style` packages reusable semantic styling. The framework already supported what I wanted—I had just started by changing its internals instead of using the abstraction intended for the job.

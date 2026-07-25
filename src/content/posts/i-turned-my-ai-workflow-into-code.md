@@ -1,7 +1,7 @@
 ---
 title: "I Turned My AI Workflow into Code"
-published: 2026-07-24
-description: "What happened when I extracted the engineering workflow BiliKit forced me to invent into two reusable Codex Skills—and discovered that reusable judgment needs boundaries, composition, and tests of its own."
+published: 2026-07-25
+description: "BiliKit passed 21,000 lines before V1. I extracted the workflow it forced me to build into two reusable Codex Skills."
 tags: [AI, Codex, Engineering, Workflow]
 category: Engineering
 draft: false
@@ -9,294 +9,209 @@ lang: en
 translationKey: i-turned-my-ai-workflow-into-code
 ---
 
-In the previous article, I wrote about the workflow that emerged while building BiliKit, a Swift project that passed 21,000 lines before reaching version 1.
+BiliKit V1 is not finished yet, and the Swift codebase has already passed 21,000 lines.
 
-The short version was this: AI made code cheap, but it did not make coherence cheap. As the repository grew, prompting harder stopped helping. I needed durable project memory, explicit task contracts, risk-based review, vertical slices, complexity budgets, and evidence that went beyond a green test suite.
+When the project was small, my AI workflow was straightforward: write a longer prompt, let the agent make the change, and check the diff myself. Even when it got something wrong, the change usually touched few enough files that I could spot it quickly.
 
-That workflow worked.
+That stopped being enough as the repository grew.
 
-Then it created a new problem.
+The same instruction—"read the project rules before making changes"—could produce very different results in a new session. Sometimes every test passed, but the change landed in the wrong module. Sometimes a small fix came back with an entirely new abstraction.
 
-The useful parts were trapped inside one repository. Some lived in BiliKit's `AGENTS.md`, some in its quality-gate documentation, some in scripts, and some only in the habits I had learned while operating them. Starting another project would mean either rebuilding the process from memory or copying BiliKit's rules wholesale.
+BiliKit also has several areas that a green test suite cannot fully cover: Keychain access, playback lifecycles, cancellation, danmaku rendering, and the local server. A successful build does not tell me whether those paths work in a signed app or survive actual use.
 
-Both options were wrong.
+So the repository gradually accumulated more machinery:
 
-Rebuilding from memory would lose the details that made the workflow reliable. Copying the files would preserve far too many details that only made sense for BiliKit: Bilibili protocol boundaries, Keychain ownership, media redirect policy, danmaku renderer risks, specific package names, and a milestone structure that belonged to one product.
+- `AGENTS.md`
+- risk levels
+- quality gates
+- independent review
+- complexity budgets
+- different validation paths for different kinds of work
 
-What I wanted to reuse was not the policy.
+After a while, the workflow was reasonably stable inside BiliKit. Then I started another project and realized I would have to assemble it all over again.
 
-I wanted to reuse the method that produced the policy.
+Some rules lived in `AGENTS.md`, some in gate documents and scripts, and some were still habits in my head. I could rewrite them from memory or copy the BiliKit files.
 
-So I created a new repository called `codex-engineering-skills` and started turning the workflow into two reusable Codex Skills:
+The first option would miss things. The second would bring far too much baggage.
 
-- `project-governance-bootstrap`, which derives project-specific governance from an actual checkout;
-- `apple-dev-loop`, which chooses and runs the smallest evidence loop capable of proving an Apple-platform engineering claim.
+A static website does not need BiliKit's rules for playback, Keychain, local servers, or media redirects. A utility with fewer than 1,000 lines may still need strict handling if those lines touch credentials.
 
-This is not a story about packaging a prompt.
+What I wanted to reuse was the way those rules were derived.
 
-It is a story about what happened when I tried to turn engineering judgment into code.
+I created a repository called `codex-engineering-skills` and started with two Codex Skills:
 
-## A workflow is not reusable just because it is written down
+- `project-governance-bootstrap`
+- `apple-dev-loop`
 
-My first instinct was the obvious one: extract the useful sections from BiliKit's engineering guide into a generic template.
+The first reads a project and builds engineering rules that fit it. The second handles the build, test, and validation loop for Apple-platform work.
 
-That approach failed almost immediately.
+## Copying BiliKit's AGENTS.md did not work
 
-BiliKit classifies authentication, redirects, local servers, playback, concurrency, renderers, and destructive migration as high-risk work. Those are sensible categories for BiliKit because the product actually has those failure modes. Copy the same list into a static website and it becomes theater. Copy BiliKit's requirement for signed Keychain validation into a command-line parser and the process becomes nonsense.
+My first idea was to turn BiliKit's `AGENTS.md` into a generic template.
 
-The reverse failure is worse. A small utility that handles credentials may contain fewer than a thousand lines and still deserve stricter controls than a large generated library. Repository size is a poor proxy for consequence.
+It did not take long to find the problem.
 
-This led to the first rule of the extraction:
+BiliKit treats authentication, redirects, local servers, playback, concurrency, renderers, and destructive migration as high-risk work. That list makes sense because the project actually has those failure modes. Put the same list in a static website and it becomes ceremony. Ask a command-line parser to validate Keychain behavior in a signed app and the workflow becomes ridiculous.
 
-> Reuse the decision procedure, not the previous decision.
+`project-governance-bootstrap` therefore starts by reading the repository:
 
-The governance Skill does not say that every repository needs BiliKit's rules. It begins by reading the repository's own instructions, architecture decisions, manifests, CI, tests, security documents, and release boundaries. Then it selects the lowest governance profile that covers the failure modes it actually finds:
+- existing instructions
+- architecture decisions
+- manifests and dependencies
+- tests
+- CI
+- security boundaries
+- release process
 
-- **light** for a small, reversible surface with one primary validation path;
-- **standard** for multiple modules, public boundaries, CI, persistence, or several validation layers;
-- **critical** for credentials, authorization, destructive migration, untrusted input, local servers, media lifecycles, production infrastructure, or difficult rollback.
+It then chooses one of three rough profiles:
 
-The output is still project-specific. The reusable part is how the Skill gets there.
+- **light**: small, easy to roll back, and mainly one validation path;
+- **standard**: multiple modules, public boundaries, persistence, CI, or several test layers;
+- **critical**: credentials, authorization, destructive migration, untrusted input, local servers, media lifecycles, or production infrastructure.
 
-This sounds obvious in retrospect. It was not obvious while the rules were working inside one project. A local workflow accumulates assumptions so gradually that they become invisible. Extraction makes every assumption answer a harder question:
+Line count is only a clue. One hundred thousand lines of generated code may be harmless; a short migration that deletes data is not.
 
-> Is this a general principle, a platform profile, or merely a fact about the project that taught me the principle?
+The result is still the project's own policy. The reusable part is the process used to produce it.
 
-Most of the work was separating those three.
+## It ended up looking more like a compiler
 
-## The Skill is a compiler, not a template
+I now think of `project-governance-bootstrap` as a small compiler.
 
-I now think of `project-governance-bootstrap` less as a document generator and more as a small compiler.
-
-Its input is a repository:
+Its input looks roughly like this:
 
 ```text
-code + manifests + ADRs + tests + CI + security boundaries + release rules
+code
++ manifests
++ architecture documents
++ tests
++ CI
++ security boundaries
++ release rules
 ```
 
-Its output is an enforceable project contract:
+Its output looks like this:
 
 ```text
 source-of-truth order
 + architectural boundaries
-+ proportional risk zones
++ risk areas
 + validation entry points
 + authorization limits
 + optional reviewer roles
 ```
 
-A compiler does not paste a previous program into a new file. It reads a specific input, applies rules, and produces an output appropriate to that input.
+There are templates in the repository, but they are only starting points. If a section does not apply, it should disappear.
 
-That is why the Skill explicitly rejects several tempting shortcuts:
+Templates have a habit of keeping themselves alive. Once a generic "Security" section exists, both people and AI tend to fill it with text even when the project has no meaningful security boundary. The document becomes complete-looking and mostly useless.
 
-- it does not overwrite an existing `AGENTS.md` wholesale;
-- it does not transplant product names, paths, thresholds, or risk categories;
-- it does not turn line counts or model choices into evidence;
-- it does not generate custom agents unless independent roles have recurring value;
-- it does not create a new gate script when an existing command already proves the claim;
-- it does not encode temporary milestones, test counts, commit IDs, or CI runs as permanent rules.
+If the repository already has a command that proves the relevant result, there is no reason to add another gate script. If there is no special security boundary, a few paragraphs of generic security advice do not help.
 
-The templates in the repository are drafting skeletons, not canonical policy. Every irrelevant section is supposed to disappear.
+Enough is enough.
 
-This distinction matters because templates have gravity. Once a section exists, both humans and models tend to preserve it. A generic "Security" heading invites generic security prose even when the repository has no meaningful security boundary. A prewritten red-zone list encourages classification by resemblance instead of consequence.
+## Why there are two Skills
 
-Good generated governance is not the most complete document. It is the smallest document that prevents the project's likely expensive mistakes.
-
-## I split one workflow into two Skills
-
-The BiliKit workflow mixed two related but different questions:
+The original BiliKit workflow mixed two questions:
 
 1. What does this repository require?
-2. How do I prove this Apple-platform change works?
+2. How should this Apple-platform change be validated?
 
-It was tempting to keep them together because BiliKit is an Apple-platform project and commonly needs both. I separated them anyway.
+They often appear together in BiliKit, but I split them when making the workflow reusable.
 
-The root README now describes the relationship in one sentence:
+`project-governance-bootstrap` owns the repository rules. It may decide that a project needs signed-app evidence, UI testing, or a performance recording, but it does not contain every Xcode procedure.
 
-> The governance Skill defines what a repository requires. The Apple development Skill executes Apple-platform validation when a concrete task requires it.
+`apple-dev-loop` owns the actual validation. It knows when to use SwiftPM, `xcodebuild`, `.xcresult`, XCUI, a signed app, Computer Use, or Instruments. It does not decide the application's architecture or risk policy.
 
-`project-governance-bootstrap` owns policy derivation. It may discover that an Apple repository needs signed-app evidence, UI validation, or a performance recording, but it does not carry the operational instructions for every Xcode tool.
+They can be used together, but neither depends on the other. The governance Skill can also work on Rust, TypeScript, or documentation repositories. The Apple Skill can work in a Swift project that already has its own engineering rules.
 
-`apple-dev-loop` owns execution. It knows how to move from source inspection through SwiftPM, `xcodebuild`, `.xcresult`, Xcode MCP, XCUI, a signed app, Computer Use, Instruments, and CI. It does not decide the product's architecture or invent its risk policy.
+## A Skill also needs to know when to stay out
 
-Neither Skill loads the other. Neither requires the other to be installed.
+While writing the Skills, I found that the trigger description needed as much care as the workflow itself.
 
-This is the same boundary rule I use in application architecture: things that are often used together do not automatically belong to the same owner.
+If `apple-dev-loop` ran whenever a request mentioned Swift, a syntax question could suddenly turn into Xcode preflight, scheme discovery, and a full build. Thorough, perhaps, but also completely unnecessary.
 
-Keeping them independent has practical benefits. The governance Skill remains useful for Rust, TypeScript, or documentation repositories. The Apple development Skill remains useful in a Swift project that already has excellent governance and only needs a concrete validation loop. When both apply, the repository contract says what must be proved, and the Apple loop chooses the appropriate mechanism.
+Its trigger therefore says when the full loop applies and when it does not. It is useful when a task really needs the Apple toolchain, signing, a device, UI validation, or performance evidence. A source-only Swift explanation or a narrow package edit usually does not.
 
-Composition is more useful than comprehensiveness.
+`project-governance-bootstrap` has a similar boundary. The existence of an `AGENTS.md` file is not, by itself, a request to redesign the repository's governance.
 
-## Trigger boundaries are part of correctness
+I used to think extra instructions were mostly harmless. In practice, they consume context and change tool choices. Detailed Instruments instructions make Instruments look tempting even in a simple package-test task.
 
-A normal function is dangerous when it returns the wrong result. A Skill can be dangerous before it runs, simply by activating for the wrong task.
+More context can create more work.
 
-If `apple-dev-loop` triggered for every question containing the word "Swift," a source-only explanation would suddenly acquire Xcode preflight, scheme discovery, and build requirements. The workflow would be technically rigorous and practically unbearable.
+## Keeping SKILL.md small
 
-So its description includes both the positive and negative boundary. It applies when a Swift, SwiftUI, AppKit, UIKit, Xcode, device, signing, UI, or performance task needs an end-to-end evidence loop. It does not apply to a source-only explanation or a narrow package edit that needs no Apple toolchain or runtime validation.
+The first design almost became two enormous `SKILL.md` files.
 
-The governance Skill has the same constraint. It applies when starting, auditing, or upgrading repository governance. It should not appear merely because a repository happens to contain an `AGENTS.md`.
+The governance Skill would have contained every risk category, template, reviewer role, and Apple exception. The Apple Skill would have contained every Xcode, XCTest, signing, simulator, UI, and Instruments recipe.
 
-This changed how I think about prompts. In a conversation, extra guidance often feels harmless. In a reusable Skill, unwanted guidance is behavior. It consumes context, changes tool choices, creates process, and can cause an agent to perform work the user never requested.
+Now each Skill keeps a short core workflow and reads supporting material only when it is needed.
 
-A Skill needs an interface, and its trigger description is part of that interface.
+An ordinary repository never loads the Apple profile. A task that does not need independent roles never loads the agent-routing guide. A package test does not load Instruments instructions in advance.
 
-## Progressive disclosure is dependency management for context
+This is usually called progressive disclosure. I think of it as dependency management for context.
 
-The first version of a reusable workflow naturally wants to contain everything.
+The details of a tool make it more likely to be selected. Loading less is useful when the omitted material cannot help with the current decision anyway.
 
-That would have produced two enormous `SKILL.md` files: one carrying every risk category, template, agent role, and Apple-platform exception; the other carrying every Xcode, XCTest, signing, simulator, UI, and Instruments recipe.
+## How far should Apple validation go?
 
-Instead, each Skill has a short operating core and loads references only when the task requires them.
+`apple-dev-loop` uses an evidence ladder:
 
-The governance Skill always knows how to inspect a repository and choose a profile. It reads the general governance model before defining risk zones. It reads the Apple profile only for an Apple-platform repository. It reads agent-routing guidance only if generating independent roles would have recurring value.
+1. source inspection and static constraints
+2. SwiftPM, unit, and integration tests
+3. `xcodebuild` with a structured `.xcresult`
+4. Xcode-aware diagnostics and actions
+5. deterministic XCUI tests
+6. a signed app and real UI interaction
+7. targeted `xctrace` or Instruments recording
+8. CI, device matrices, and independent review
 
-The Apple Skill always knows the evidence ladder and tool order. It reads Xcode MCP instructions only before configuring or using that bridge. It reads validation recipes only for the layer the task actually needs.
+The point is not to reach the last step every time. It should stop at the first level that can prove the current claim.
 
-This is usually called progressive disclosure. I find it more useful to think of it as dependency management for context.
+A screenshot cannot replace a unit test. An unsigned build cannot prove Keychain access. Launching the app does not prove a lifetime issue is fixed. A trace from one Mac does not represent every supported device.
 
-Context has a cost. It competes for attention. It can bias decisions toward whichever mechanisms are described most vividly. Loading Instruments guidance into a simple package-test task does not merely waste tokens; it makes a higher-cost validation route feel more available and therefore more likely.
+The Skill also includes a few small scripts. One records the repository, workspace, scheme, Xcode, and Developer Directory before an expensive run. Another reads structured results from `.xcresult` instead of guessing from thousands of lines of console output.
 
-The best context is not all potentially relevant knowledge. It is the smallest dependency set needed for the current decision.
+I did not try to rebuild Xcode in shell. The scripts only cover bounded steps where automation removes ambiguity.
 
-## The evidence ladder became executable
+## Even the installer needs guardrails
 
-The conceptual center of `apple-dev-loop` is an evidence ladder:
+The repository has a script that installs the Skills as symbolic links so Codex can discover them.
 
-1. static contracts and source inspection;
-2. SwiftPM, unit, and integration tests;
-3. `xcodebuild` with a structured `.xcresult`;
-4. Xcode-aware diagnostics and actions;
-5. deterministic XCUI smoke tests;
-6. a signed app and real UI interaction;
-7. targeted `xctrace` or Instruments recording;
-8. CI or device matrices and independent review.
+If the destination already points to the correct location, the script does nothing. If it is another link or a real directory, the script refuses to overwrite it.
 
-The instruction is not to climb as high as possible.
+It is a small detail, but an installer that silently replaces an existing Skill is an easy way to lose data. The same applies to changing global `xcode-select` just to make one build pass: it may fix the current project and leave every other Xcode project with a surprise.
 
-It is to stop at the lowest level that proves the claim.
+The Skills prefer configuration scoped to the current task. Ambiguous state causes a stop, and a missing optional tool is only a blocker when the current claim actually requires it.
 
-This preserves two properties that AI workflows easily lose: reproducibility and proportionality. A screenshot cannot replace a unit test. A successful unsigned build cannot prove Keychain access. A signed launch cannot prove a memory-lifetime claim. A 30-minute trace on one machine cannot prove an entire supported-device matrix.
+## Vague rules became harder to keep
 
-Each layer answers a different question.
+Inside BiliKit, a sentence such as this felt clear enough:
 
-The Skill adds small scripts around this model. A preflight records the repository, project or workspace, scheme, selected Xcode, developer directory, and relevant capabilities before expensive work begins. An `.xcresult` summarizer reads structured test output instead of asking the model to infer truth from thousands of lines of console text.
+> Important changes require independent review.
 
-The scripts do not automate every possible Apple workflow. That would recreate Xcode badly in shell. They automate the parts where stable, bounded facts prevent expensive ambiguity.
+In a reusable Skill, it immediately raises more questions. What counts as important? Does every multi-file edit need review? What should the reviewer know? What happens when two reviews disagree?
 
-Everything else remains routed to the tool that owns it:
+The rule had to become narrower.
 
-- repository search and CLI for reproducible source, build, and test facts;
-- Xcode MCP for live project semantics;
-- XCUI for stable user paths;
-- Computer Use for real visual or permission-bound state with no better interface;
-- `xctrace` for a specific performance question;
-- the user for passwords, Keychain unlocks, unexpected permissions, and irreversible authorization.
+Green work does not need a review ceremony. Non-mechanical yellow work may get an independent read-only review. Red work focuses review on failure paths, cancellation, ownership, security, cleanup, and rollback. It also gets a complexity budget, because "being rigorous" can otherwise keep adding process forever.
 
-The workflow became code without pretending every judgment could become automation.
+Other familiar instructions had the same problem.
 
-## Skills need safety boundaries too
+"Run the full test suite" is wrong when the highest deterministic mode already includes the lower modes. "Test on a real device" only makes sense when deterministic tests cannot prove the claim. "Use Xcode MCP" still requires checking which Xcode process, window, workspace, and scheme it is connected to.
 
-Once a workflow can act, installation and environment behavior become part of its safety model.
+Rules that survived through project context needed explicit conditions once they became reusable.
 
-The repository includes a linking script that makes each Skill discoverable through one canonical editable copy. It creates symbolic links rather than duplicating directories. If the destination already contains the exact correct link, it leaves it alone. If it contains a different link or a real directory, it refuses to replace it.
+## The Skills need tests too
 
-That refusal is a small but important design choice.
+The repository has a validator for metadata, internal links, unresolved placeholders, shell syntax, and formatting. The link installer has separate conflict checks.
 
-An "install" helper that silently replaces an existing Skill would turn convenience into data loss. A script that changes global `xcode-select` to make one build pass would repair the current task by mutating every other Xcode workflow on the machine. A tool that accepts permanent external-agent permissions without explicit approval would convert temporary access into ambient authority.
+Those checks only prove that the files are structurally valid.
 
-The Skills therefore prefer injected, local configuration over hidden global mutation. They stop on ambiguity. They distinguish a missing optional capability from a blocker. They require the user at the moment an action crosses an authorization boundary.
+A Skill can have clean metadata and valid shell while still making poor decisions. It can trigger too broadly, produce rules that are too heavy, ignore existing project constraints, or recommend evidence that does not answer the question.
 
-These are the same principles the workflow applies to product code:
+The useful test is trying it from a fresh context on different repositories.
 
-- one canonical owner;
-- explicit state changes;
-- narrow authority;
-- reversible operations;
-- no success claim when a required path was skipped.
+For `project-governance-bootstrap`, I want to try a small reversible tool, a normal multi-module application, and a project with real security or lifecycle risk. The generated rules should be different.
 
-A reusable engineering workflow should obey the governance it recommends.
+For `apple-dev-loop`, I want to see whether it stops in the right place: package tests for a package change, `xcodebuild` for an Xcode project, a signed app for Keychain, and Instruments only for an actual performance question.
 
-## Writing the Skill exposed holes in my own reasoning
-
-The most valuable result was not the reusable files. It was the pressure of formalization.
-
-Inside one project, "use independent review for important work" felt clear. In a Skill, it immediately raised questions:
-
-- What counts as important?
-- Does every multi-file change need a reviewer?
-- What information can the reviewer receive without inheriting the implementer's bias?
-- What happens when reviewers disagree?
-- When is another review useful, and when is it process inflation?
-
-The extracted version became narrower. Green work does not mechanically receive a review ceremony. Yellow work receives an independent read-only review when the change is not mechanically obvious. Red work adds review for failure, cancellation, ownership, security, cleanup, and rollback—but it also gets a complexity budget so rigor cannot expand without limit.
-
-The same happened with evidence. "Run the full validation suite" became "run the highest applicable deterministic mode once when it already includes the lower modes." "Test on a real device" became "use a real environment only for the claim that deterministic layers cannot prove." "Use Xcode MCP" became "first verify the intended Xcode process, window, workspace, scheme, and current tool schema."
-
-Turning prose into an operational interface forces vague wisdom to acquire stopping conditions.
-
-That is why I call this turning a workflow into code. The result is mostly Markdown and shell, but it behaves like software. It has inputs, trigger conditions, dependencies, side effects, failure modes, and claims it is allowed to make.
-
-## The code that guides code needs tests
-
-The Skills repository has its own validator.
-
-It checks metadata, internal links, unresolved placeholders, shell syntax, and whitespace. It can optionally invoke the official Skill validator. Installation uses a separate script with explicit conflict behavior. The repository's own `AGENTS.md` classifies changes to trigger semantics, templates, scripts, discovery links, and validation as meaningful engineering changes rather than "just documentation."
-
-This is still only structural validation.
-
-A Skill can have perfect frontmatter, valid links, clean shell syntax, and terrible judgment. It can trigger too broadly, generate disproportionate governance, miss an existing project rule, or recommend evidence that does not answer the task.
-
-The real test is forward use from a fresh context.
-
-For `project-governance-bootstrap`, that means giving it raw repositories of different shapes—a small reversible tool, a normal multi-module application, and a project with genuine security or lifecycle risk—and checking whether it produces different, proportional contracts without leaking BiliKit-specific policy.
-
-For `apple-dev-loop`, it means giving it concrete Apple tasks at different evidence levels and checking whether it stops correctly: package tests for a package claim, `xcodebuild` for a project claim, signed execution for a Keychain claim, and Instruments only for a real performance question.
-
-The Skills are not mature merely because they have been extracted. At the time of writing, the repository is new and the abstraction has not yet accumulated cross-project evidence.
-
-That limitation belongs in the design, not in fine print.
-
-## What remained human
-
-The extraction automated less than I initially expected.
-
-It can inspect a repository, produce a bounded inventory, route to references, validate files, choose an evidence layer, preflight an Apple environment, and summarize structured results.
-
-It cannot decide the product I should build. It cannot authorize a risky experiment on my behalf. It cannot turn a guessed threshold into a requirement. It cannot know that a technically complete feature is strategically unnecessary. It cannot decide whether another mechanism is useful rigor or fear disguised as engineering.
-
-The earlier article ended with the human as the owner of scope, risk, and truth. The Skills preserve that boundary.
-
-They do not encode the answers. They make the questions harder to skip.
-
-That may be the most useful kind of AI tooling I can build right now. Not a system that tries to replace judgment, but one that carries the tedious structure around judgment: reading the right sources, distinguishing plans from evidence, making authorization visible, selecting the smallest sufficient tool, and refusing to call an unproven claim complete.
-
-## From a private habit to a testable interface
-
-BiliKit forced me to stop treating an AI conversation as the place where engineering truth lived.
-
-The Skills project is the next step. It stops treating my personal memory as the place where the workflow lives.
-
-The progression now looks like this:
-
-```text
-personal habit
-    ↓
-project-specific rules
-    ↓
-reusable decision procedure
-    ↓
-independently triggered Skills
-    ↓
-forward tests against new projects
-```
-
-Each step removes a different kind of hidden state.
-
-The project-specific rules made BiliKit recoverable across conversations. The Skills make the method recoverable across repositories. Forward testing will determine whether the abstraction is real or whether I have merely built an elegant description of one project.
-
-That is where the work stands now.
-
-I turned my AI workflow into code. The code validates. The boundaries are explicit. The two Skills compose without depending on each other.
-
-Now they have to survive contact with projects that did not teach me how to write them.
+If the result is still BiliKit's rules with the project name replaced, I will have to go back and change it.

@@ -9,25 +9,15 @@ lang: en
 translationKey: swift-for-static-sites
 ---
 
-Recently I went through a number of static site generators in the Swift ecosystem — [Saga](https://github.com/loopwerk/Saga), [Toucan](https://github.com/toucansites/toucan), [Publish](https://github.com/JohnSundell/Publish), [Ignite](https://github.com/twostraws/Ignite), and [Raptor](https://github.com/raptor-build/raptor) — and compared them with more mature Web-native tools like [Astro](https://github.com/withastro/astro), [Hexo](https://github.com/hexojs/hexo), [Hugo](https://github.com/gohugoio/hugo), and [Jekyll](https://github.com/jekyll/jekyll).
+I recently tried to answer a practical question: if I move a visually complex blog theme to a Swift static site generator, which one should I use?
 
-At first, my question was simple:
+I went through [Saga](https://github.com/loopwerk/Saga), [Toucan](https://github.com/toucansites/toucan), [Publish](https://github.com/JohnSundell/Publish), [Ignite](https://github.com/twostraws/Ignite), and [Raptor](https://github.com/raptor-build/raptor), then compared them with Web-native tools such as [Astro](https://github.com/withastro/astro), [Hexo](https://github.com/hexojs/hexo), [Hugo](https://github.com/gohugoio/hugo), and [Jekyll](https://github.com/jekyll/jekyll).
 
-> If I want to migrate a complex visual blog theme into a Swift SSG, which tool works best?
+After reading their source and examples and trying them myself, I found that the choice depends less on feature count than on where Swift sits in the stack. A SwiftUI-like component API and a Swift program that generates ordinary HTML may look similar in a small demo, but they behave very differently once the design needs custom CSS.
 
-But after reading source code, examples, and trying them in practice, the real question became:
+## The browser is the UI runtime
 
-> **Where should Swift actually live in the Web stack?**
-
-Should we try to express UI using Swift components (like SwiftUI), or should we accept that the Web is fundamentally HTML, CSS, and JavaScript — and let Swift focus on modeling and generation?
-
-This question turns out to be fundamental.
-
-## The Web Already Has a Native Runtime
-
-SwiftUI works on iOS because it maps directly to a system UI runtime.
-
-You can think of it like this:
+SwiftUI works on iOS because its abstractions connect to a system UI runtime:
 
 ```plain
 iOS:
@@ -41,25 +31,15 @@ Browser runtime (DOM + CSS + JS)
 → Your HTML/CSS/JS
 ```
 
-A SwiftUI Button is not a simulation — it connects directly to platform behaviors: accessibility, focus, animation, input.
-
-But a Button in Raptor or Ignite ultimately becomes:
+A SwiftUI `Button` is connected to platform behavior including accessibility, focus, animation, and input. A button declared through Raptor or Ignite eventually becomes:
 
 ```html
 <button class="...">Save</button>
 ```
 
-plus CSS.
+plus CSS. The browser does not know about the Swift component that produced it; it only receives HTML, CSS, and JavaScript.
 
-The browser has no idea what a Swift Button is. It only understands HTML, CSS, and JS.
-
-So the issue is not whether declarative UI is good — React, Vue, and Astro are all declarative.
-
-The difference is what you are declaring.
-
-## What Are You Actually Declaring?
-
-Let’s compare:
+This is not an argument against declarative UI. React, Vue, and Astro are declarative too. The important difference is the object being declared and how closely it matches the browser's own model.
 
 | Framework      | What you declare                  | Distance from the platform |
 | -------------- | --------------------------------- | -------------------------- |
@@ -70,23 +50,11 @@ Let’s compare:
 | Ignite         | Swift components (Bootstrap-like) | Medium                     |
 | Raptor         | SwiftUI-like UI + style system    | Farther                    |
 
-This table doesn’t say which is better — it shows how closely your mental model matches what the browser actually runs.
+SwiftUI maps closely to its platform. React still models the DOM, and Astro treats HTML as a first-class part of the component. Ignite and Raptor move the working model farther upward into a Swift component tree. That can be pleasant for a simple page, but the extra translation becomes visible in a heavily customized theme.
 
-SwiftUI works because the abstraction matches the platform.
+## Where the component DSL stops helping
 
-React works because it still models the DOM.
-
-Astro works because it embraces HTML as a first-class citizen.
-
-Raptor and Ignite, however, try to move the abstraction upward — into a Swift component tree.
-
-That works beautifully for simple pages.
-
-But when the UI becomes complex, friction appears.
-
-## The Sweet Spot — and the Cliff
-
-Frameworks like Ignite shine when the UI is simple:
+Ignite-style components are convenient for straightforward UI:
 
 ```swift
 Text("Hello")
@@ -96,9 +64,9 @@ Grid {
 }
 ```
 
-Bootstrap gives you layout, spacing, responsiveness, and visual hierarchy for free.
+With Bootstrap underneath, layout, spacing, responsiveness, and basic visual hierarchy arrive quickly. That is a good fit for documentation, portfolios, basic blogs, and other sites that can stay near the framework's built-in vocabulary.
 
-But real-world visual themes often require things like:
+A migrated visual theme is usually less cooperative. It may depend on CSS such as:
 
 ```css
 .card::before
@@ -110,22 +78,16 @@ mask-image
 container queries
 ```
 
-Once you go beyond built-in components, you often fall back to:
+Once the built-in components no longer express the design, the Swift code falls back to lower-level HTML wrappers:
 
 ```swift
 Tag("aside") { ... }
 .class("layout-shell__sidebar")
 ```
 
-and then write CSS anyway.
+The CSS still has to be written. The page is now split between a SwiftUI-style vocabulary and direct HTML and CSS, so the abstraction no longer removes much work.
 
-At that point, the abstraction becomes fragmented:
-
-> half SwiftUI-style, half HTML wrapper.
-
-The issue isn’t that Raptor or Ignite are flawed.
-
-It’s that their abstraction sweet spot is:
+The useful range for this approach is still real:
 
 ```plain
 Simple sites
@@ -135,13 +97,11 @@ Basic blogs
 Bootstrap-like layouts
 ```
 
-When your goal is a highly customized visual theme, especially one originally written in Astro or Hexo, the abstraction starts to break.
+The difficulty begins when a theme originally built in Astro or Hexo relies on precise selectors, pseudo-elements, layout rules, and browser-specific behavior. This is a boundary of the abstraction, not a defect in declarative UI or in the frameworks themselves.
 
-## Saga: Swift Purism, Not SwiftUI Purism
+## Saga keeps the boundary visible
 
-Saga takes a very different approach.
-
-Instead of trying to replace Web primitives, it divides responsibilities cleanly:
+Saga takes a different route. It uses Swift for the parts where Swift is useful and leaves browser concerns in Web-native forms:
 
 ```plain
 Swift:
@@ -156,7 +116,7 @@ CSS styling
 JavaScript behavior
 ```
 
-A Saga template might look like:
+A template can look like this:
 
 ```swift
 article(class: "mx-auto max-w-3xl px-6 py-12") {
@@ -169,13 +129,7 @@ article(class: "mx-auto max-w-3xl px-6 py-12") {
 }
 ```
 
-This is not SwiftUI.
-
-It does not pretend to be.
-
-It is simply Swift generating HTML — with full respect for Web primitives.
-
-That’s why Saga feels more “native” in both worlds:
+This is Swift generating HTML, not an attempt to reproduce SwiftUI in a browser. The division remains easy to inspect:
 
 ```plain
 Swift-native:
@@ -185,9 +139,11 @@ Web-native:
 HTML, CSS, browser semantics
 ```
 
-## Tailwind Changes the Experience
+For this kind of project, that directness matters more than having a larger UI abstraction.
 
-Without Tailwind, Saga feels like classic HTML + CSS:
+## Tailwind makes Saga more practical
+
+Without Tailwind, a Saga template resembles conventional HTML with named CSS classes:
 
 ```swift
 article(class: "post-card") {
@@ -197,7 +153,7 @@ article(class: "post-card") {
 }
 ```
 
-With Tailwind:
+With Tailwind, the layout and styling remain next to the generated HTML:
 
 ```swift
 article(class: "group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg") {
@@ -209,21 +165,11 @@ article(class: "group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm
 }
 ```
 
-Now you’re controlling layout, spacing, and style directly at the HTML level.
+There is no need to translate each CSS concept into a Swift modifier API. Tailwind is still CSS, expressed through utility classes, so the browser-facing model stays recognizable.
 
-No translation needed.
+## Raptor and Ignite fit different jobs
 
-This avoids one of the biggest problems in SwiftUI-style DSLs:
-
-> translating CSS concepts into Swift modifiers.
-
-Instead, Tailwind remains CSS — just expressed differently.
-
-## Raptor: Ambitious, but Friction-Prone for Complex UI
-
-Raptor aims higher than a typical SSG.
-
-It defines:
+Raptor is more ambitious than a conventional static site generator. It defines a broad site model:
 
 ```plain
 Site
@@ -236,79 +182,37 @@ Style
 PostWidget
 ```
 
-It even integrates with Vapor for server-side rendering.
+It also integrates with Vapor for server-side rendering. That makes it interesting for Swift-first content platforms, static and dynamic hybrid sites, and projects that need backend integration.
 
-This is powerful — especially for:
-
-* Swift-first content platforms
-* Static + dynamic hybrid sites
-* Backend integration
-
-But it doesn’t automatically solve front-end expression.
-
-In fact, once UI becomes complex, you often end up writing:
+The site model does not automatically make a complex front end easier to express, however. When the theme exceeds its UI and style system, the implementation returns to:
 
 ```plain
 Tag + Div + Class + CSS
 ```
 
-again.
+At that point I would want the higher-level model to solve a separate problem—content architecture or server integration, for example—because it is no longer reducing the front-end work.
 
-Which raises a fundamental question:
-
-> If complex UI still requires Web-native expression, what value does the abstraction add?
-
-## Ignite: Fast, but Opinionated
-
-Ignite is more pragmatic.
-
-It embraces:
+Ignite makes a more pragmatic trade:
 
 ```plain
 Swift API + Bootstrap
 ```
 
-This makes it great for:
+It is fast for a small site, portfolio, or documentation project. The trade-off is that Bootstrap's structure and visual assumptions become harder to hide when the site needs a distinctive theme.
 
-* quick sites
-* portfolios
-* documentation
+## Why I would still use Astro for the complex theme
 
-But Bootstrap becomes visible.
+If Swift is not itself a project requirement, Astro remains the safer choice for this particular job:
 
-If your goal is a highly customized visual identity, the built-in structure can become limiting.
+- HTML, CSS, and JavaScript are first-class;
+- its components stay close to browser primitives;
+- Tailwind integration is straightforward;
+- Content Collections provide structure;
+- the ecosystem is mature.
 
-## Astro: Still the Most Stable Choice
+That does not make Swift incapable of building websites. It means the cost of the Swift abstraction has to buy something the project needs.
 
-If we ignore Swift entirely and ask:
-
-> *What is the most stable tool for complex visual static sites?*
-
-The answer is still Astro.
-
-Because:
-
-* HTML/CSS/JS are first-class
-* Components are native to the platform
-* Tailwind integration is smooth
-* Content Collections provide structure
-* Ecosystem is mature
-
-Astro doesn’t fight the Web.
-
-It grows from it.
-
-## The Real Question
-
-This entire exploration leads to a clearer conclusion:
-
->**The real question is not “Can Swift build websites?”**
->
->**It is “Where should Swift be used?”**
-
-## Final Perspective
-
-There are two fundamentally different philosophies:
+The two Swift approaches I compared can be summarized as:
 
 ### SwiftUI-style Web DSL (Raptor / Ignite)
 
@@ -324,22 +228,9 @@ Swift handles logic and structure
 HTML/CSS/JS express the UI
 ```
 
-For complex visual sites, the second model is more stable.
+For a highly customized visual site, I prefer the second model. Swift still provides types, functions, composition, content modeling, and generation logic, while HTML, CSS, and JavaScript retain control of the UI.
 
-Not because it is more powerful —
-but because it respects the platform.
-
-## Final Takeaway
-
-> **Swift should not compete with HTML/CSS/JS.**
->
-> **It should complement them.**
-
-When Swift tries to replace the UI layer, abstraction costs rise quickly.
-
-When Swift focuses on modeling and generation, its strengths — type safety, composition, and tooling — shine.
-
-## TL;DR
+My practical shortlist after the comparison is:
 
 ```plain
 Not using Swift: Astro + Tailwind

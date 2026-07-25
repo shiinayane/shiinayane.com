@@ -11,17 +11,17 @@ lang: en
 translationKey: dotfiles
 ---
 
-Here is a question I could not answer about my own machine for an embarrassingly long time: which lines in my `~/.zshrc` did I write, and which did an installer write for me?
+For a long time I could not tell which lines in my `~/.zshrc` I had written
+and which ones came from an installer.
 
 Installers append to your shell startup file as a matter of routine. You run an install script, it prints a cheerful "added initialization to `~/.zshrc`", and that line is now load-bearing config you did not author and will not remember. Do this for two years and your `~/.zshrc` becomes an archaeological dig: strata of half-remembered tools, some still installed, some long gone, none commented. The file works, so you never touch it, so it only grows.
 
-This article is about refusing that outcome. The goal is a home directory that is almost empty of configuration, a zsh setup split into pieces small enough to understand at a glance, and a system where the difference between what I declared and what is actually on disk — the **drift** (divergence between declared state and actual machine state) — is something I can *see* rather than discover by accident.
-
-This builds directly on the [first article](/posts/manifesto/): the home directory is a resource, and right now nothing owns it. We are going to give it an owner.
+I now keep only `~/.zshenv` in the home directory. The rest lives under
+`~/.config/zsh/`, split into small files and managed by chezmoi. This is the
+dotfiles version of the ownership model from the [first
+article](/posts/manifesto/).
 
 ## ZDOTDIR is zsh's own escape hatch
-
-The first instinct when a home directory is cluttered is to delete things and hope. The better move is to learn what zsh actually reads, and in what order, because the clutter is not arbitrary — it follows zsh's startup sequence.
 
 When zsh starts, it sources files in a fixed order. For an interactive login shell on macOS it is roughly:
 
@@ -216,4 +216,6 @@ In practice this means a couple of ignore rules. `.gitignore` in the source repo
 
 The machine-specific fragment, `90-local.zsh`, is the designated place for anything that should differ per machine or stay off the network — a work proxy, a local-only alias. It loads last so it can override, and it is the one fragment I deliberately do not track.
 
-That is the whole shape: one file in `$HOME`, a directory of small ordered fragments, a source repo whose filenames declare intent, and a health check that tells me the moment something drifts. None of it is about having fewer tools. It is about the home directory finally having an owner, so that the question I opened with — which lines did I write — has an answer I can trust.
+The result is one entry file in `$HOME`, a directory of ordered fragments,
+chezmoi as the declared state, and `zhealth` for the next installer that writes
+where it should not.

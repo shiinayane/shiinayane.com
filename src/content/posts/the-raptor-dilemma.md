@@ -9,38 +9,15 @@ lang: en
 translationKey: the-raptor-dilemma
 ---
 
-## Introduction
+After comparing Astro, Saga, Toucan, Publish, Ignite, and Raptor, I wrote in [Swift for Static Sites](/posts/swift-for-static-sites/) that Swift seemed most useful for content modeling and generation, while HTML, CSS, and JavaScript should remain the UI layer.
 
-In my previous post, I explored a simple but fundamental question:
+That was based partly on reading documentation and examples. Then I built an actual Raptor theme.
 
-> **Where should Swift live in the Web stack?**
+Raptor was pleasant while the pages were simple. As soon as I tried to reproduce the details of a custom blog theme, however, I was thinking in Swift and debugging in CSS. That gap—not a particular bug—was the real problem.
 
-After comparing tools like Astro, Saga, Toucan, Publish, Ignite, and Raptor, I came to a preliminary conclusion:
+## Why Raptor felt good at first
 
-> **Swift is best suited for modeling content and generation logic,**
->
-> **while HTML, CSS, and JavaScript remain the native layer of UI expression.**
-
-However, after actually building a site with Raptor — not just reading docs, but implementing a real theme — I ran into something more concrete.
-
-Not a bug.
-Not a limitation.
-
-**A dilemma.**
-
-## What Raptor Is Trying to Do
-
-Raptor is not just a static site generator.
-
-It defines a Swift-first model of the Web:
-
-* Pages
-* Layouts
-* Themes
-* Styles
-* Components
-
-Instead of writing:
+Raptor is more than a static site generator. It provides a Swift-first model for pages, layouts, themes, styles, and components. Instead of writing this:
 
 ```html
 <article class="post-card">
@@ -48,7 +25,7 @@ Instead of writing:
 </article>
 ```
 
-You write:
+I could write:
 
 ```swift
 VStack {
@@ -57,53 +34,30 @@ VStack {
 .style(PostCardStyle())
 ```
 
-The promise is appealing:
+The appeal is easy to understand: type safety, composability, one implementation language, and a developer experience that resembles SwiftUI. In theory, the same ideas that made SwiftUI productive on Apple platforms can make a website pleasant to build.
 
-* Type safety
-* Composability
-* A unified language (Swift)
-* A SwiftUI-like developer experience
-
-In theory, this brings the same productivity gains SwiftUI brought to iOS.
-
-## The Sweet Spot
-
-For simple pages, this works extremely well.
-
-You can write:
+For simple pages, they do. These components are concise:
 
 ```swift
 Text("Hello")
 Button("Read more")
 ```
 
-And quickly build:
-
-* landing pages
-* documentation sites
-* simple blogs
-
-The abstraction feels clean, expressive, and productive.
-
-If your UI fits into:
+Landing pages, documentation sites, and basic blogs fit the model well. If most of the interface can be described as:
 
 ```plain
 Text + Button + Grid + Card
 ```
 
-Raptor feels great.
+Raptor is expressive and fast.
 
-## Where It Starts to Break
+## A custom theme exposes the boundary
 
-But real-world UI rarely stays simple.
+The trouble started with ordinary theme details rather than an exotic browser feature.
 
-Especially if your goal is to build a **custom visual theme**.
+### A metadata row
 
-Let’s take a very common pattern from blog themes:
-
-### Example 1: Meta row layout
-
-In CSS:
+In CSS, a row with categories on one side and a timestamp on the other can be expressed directly:
 
 ```css
 .meta {
@@ -115,7 +69,7 @@ In CSS:
 }
 ```
 
-In Raptor, you end up rewriting the intent:
+The Raptor version rewrites the same intent as a component layout:
 
 ```swift
 HStack {
@@ -126,13 +80,11 @@ HStack {
 .style(Property.width(.percent(100)))
 ```
 
-This is fine — even cleaner.
+This version is fine, and arguably cleaner. The abstraction still matches the problem.
 
-But now consider more complex cases.
+### A pseudo-element used for decoration
 
-### Example 2: Pseudo-elements (::after)
-
-In CSS:
+The next detail was a small accent bar:
 
 ```css
 .recent-info::after {
@@ -145,24 +97,17 @@ In CSS:
 }
 ```
 
-In Raptor:
+In Raptor, I represented it as a component:
 
 ```swift
 RecentInfoAccentBar()
 ```
 
-You replace a CSS pseudo-element with a real component.
+That works, but the meaning has changed. CSS treats the bar as a decorative layer attached to an element. The component tree treats it as structure. I was no longer only styling the existing document; I was changing the document structure to reproduce a styling technique.
 
-That’s not inherently bad — but it changes how you think:
+### A hover relationship
 
-* CSS: decorative layer
-* Raptor: structural element
-
-You are no longer “styling”, you are rebuilding structure.
-
-### Example 3: Hover interactions across elements
-
-In CSS:
+CSS selectors can also describe a relationship between two elements:
 
 ```css
 .card:hover .read-more {
@@ -170,20 +115,11 @@ In CSS:
 }
 ```
 
-In Raptor:
+There was no equally clean expression for this in the Raptor component model. I either had to redesign the interaction or coordinate the relevant styles manually. The browser already understands the parent-hover/descendant relationship; the Swift abstraction did not make that relationship easier to state.
 
-There is no clean equivalent unless:
+### A negative margin
 
-* you redesign the interaction
-* or manually coordinate styles
-
-Because:
-
-> **CSS selectors express relationships that Raptor’s component model does not.**
-
-## Example 4: Negative margins and layout hacks
-
-In CSS:
+Even a familiar layout adjustment remains a CSS operation:
 
 ```css
 .read-more {
@@ -191,25 +127,15 @@ In CSS:
 }
 ```
 
-In Raptor:
+Raptor can express it:
 
 ```swift
 .style(Property.marginTop(.px(-21)))
 ```
 
-At this point, you are not escaping CSS.
+But by this point I had not escaped CSS. I had translated CSS into Swift syntax.
 
-You are **translating it**.
-
-## The Core Dilemma
-
-This leads to the central issue:
-
-> **Raptor tries to replace Web UI with Swift abstractions,**
->
-> **but it still runs on a platform that only understands HTML, CSS, and JavaScript.**
-
-So developers end up in a strange position:
+The mismatch can be summarized like this:
 
 ```plain
 They think in Swift,
@@ -222,15 +148,9 @@ They define styles,
 but still rely on raw CSS properties.
 ```
 
-The abstraction doesn’t remove complexity.
+## The theme ended up with two mental models
 
-It **relocates it**.
-
-## The Practical Reality
-
-In practice, building a real theme feels like this:
-
-### Step 1: Swift abstraction
+A typical card began as a useful Swift component:
 
 ```swift
 PostListItem {
@@ -241,13 +161,13 @@ PostListItem {
 }
 ```
 
-### Step 2: Style layer
+Reusable styles kept the first layer tidy:
 
 ```swift
 .style(PostCardStyle())
 ```
 
-### Step 3: Eventually…
+Then the visual adjustments accumulated:
 
 ```swift
 .style(Property.marginTop(.px(12)))
@@ -255,13 +175,7 @@ PostListItem {
 .style(Property.fontSize(.px(14)))
 ```
 
-At this point:
-
-You are writing CSS again — just in Swift syntax.
-
-## The Fragmentation Problem
-
-You end up with a split mental model:
+The generated page still runs on HTML, CSS, and JavaScript, so browser behavior remains the source of truth. The working model became:
 
 ```plain
 Structure → Swift
@@ -269,24 +183,18 @@ Styling → CSS concepts
 Layout debugging → Browser DevTools
 ```
 
-This creates a workflow that feels:
+The daily experience was therefore:
 
 ```plain
 Half SwiftUI
 Half traditional Web
 ```
 
-Not fully one or the other.
+Raptor had moved the complexity, not removed it. I wrote components in Swift, inspected the resulting DOM, and fixed layout using knowledge of CSS.
 
-## Comparison: Saga
+## Saga keeps the Web boundary visible
 
-This is where Raptor differs sharply from Saga.
-
-Saga does not try to replace Web UI.
-
-It embraces it.
-
-Example:
+Saga takes a different approach. A template can still use Swift for composition while leaving the generated HTML and its classes obvious:
 
 ```swift
 article(class: "mx-auto max-w-3xl px-6 py-12") {
@@ -299,7 +207,7 @@ article(class: "mx-auto max-w-3xl px-6 py-12") {
 }
 ```
 
-Here:
+The division of responsibility is explicit:
 
 ```plain
 Swift → structure + composition
@@ -307,82 +215,36 @@ HTML → structure
 CSS → styling
 ```
 
-No translation layer.
+There is less translation between the code I author and the page I debug. For a visually demanding site, I find this easier to reason about than a SwiftUI-style layer over the browser.
 
-No abstraction mismatch.
+## Where I would use Raptor
 
-## Why This Matters
+Swift can express a Web UI; the question is how much distance from the rendering platform is useful.
 
-The problem is not whether Swift can express UI.
-
-It can.
-
-The problem is:
-
-> **Should it?**
-
-For simple UI:
+For a generic interface:
 
 ```plain
 Abstraction helps
 ```
 
-For complex UI:
+For a highly customized interface:
 
 ```plain
 Abstraction fights the platform
 ```
 
-## A Key Insight
+Raptor is strongest in the first case: structured pages made from familiar components, where its type safety and composition do real work. It becomes less comfortable in the second, precisely when selectors, pseudo-elements, and small layout adjustments matter most.
 
-After building a real site, the conclusion becomes clearer:
-
-> **Raptor’s abstraction is strongest where UI is generic,**
->
-> **and weakest where UI is highly customized.**
-
-Which is exactly where you need control the most.
-
-## A More General Perspective
-
-This is not just about Raptor.
-
-It’s about **layers**.
+The broader stack still has two layers:
 
 ```plain
 Rendering layer → HTML / CSS / JS
 Authoring layer → Swift / React / Astro
 ```
 
-React and Astro work well because they remain close to the rendering layer.
+React and Astro stay relatively close to the rendering layer. Raptor deliberately moves farther away, which gives it a distinctive SwiftUI-like experience but also creates the mismatch I hit while building the theme.
 
-Raptor moves further away.
-
-That distance is both its strength and its weakness.
-
-## Conclusion
-
-Raptor is an ambitious attempt to bring SwiftUI-style thinking to the Web.
-
-But the Web already has its own native UI system.
-
-The dilemma is not about capability.
-
-It’s about boundaries.
-
-> **When Swift tries to replace Web UI,**
->
-> **the abstraction cost grows quickly.**
->
-> **When Swift complements Web UI,**
->
-> **its strengths actually shine.**
-
-In the end:
-
-> **The Web tends to win.**
-
-## Final Takeaway
+My practical boundary after this project is:
 
 ```plain
 Swift for logic → great
@@ -390,12 +252,4 @@ Swift for UI abstraction → situational
 HTML/CSS/JS → still the source of truth
 ```
 
-## TL;DR
-
-* Raptor shines for simple, structured UI
-* It struggles with complex, highly customized layouts
-* CSS concepts inevitably leak through
-* Saga-style approaches feel more stable for visual-heavy sites
-* The real question is not “Can Swift build UI?” but:
-
-> **"Where should Swift stop?"**
+I would still choose Raptor for a simple, structured Swift site. For a visual-heavy theme, I would rather use a Saga-style approach and keep the browser’s own UI model visible.

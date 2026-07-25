@@ -1,7 +1,7 @@
 ---
-title: "Clean Isn't Minimal: A Manifesto for the Layered Mac"
+title: "I Rebuilt My Mac Around Four Layers"
 published: 2026-05-30
-description: "Clean means single-source-of-truth layering, not installing the fewest tools."
+description: "A DFU restore forced me to decide which tool owns each part of my development environment—and how I would rebuild it."
 tags: [macos, mise, dotfiles, devenv]
 category: Engineering
 series: "sovereign-tools"
@@ -11,25 +11,27 @@ lang: en
 translationKey: manifesto
 ---
 
-A few weeks ago I put a Mac mini into DFU mode (Device Firmware Update — the state where the machine has no operating system of its own and waits for another Mac to write one onto it) and erased everything. I had told myself I was doing it to fix a stubborn problem. The honest version is that I wanted a clean machine, and the only way I trusted to get one was to start from nothing.
+A few weeks ago, I put a Mac mini into DFU mode (Device Firmware Update—the state where the machine has no operating system of its own and waits for another Mac to write one onto it) and erased everything.
 
-What I expected was a tedious afternoon of reinstalling. What I got instead was a question I had been avoiding for years: when I say I want my development environment to be *clean*, what do I actually mean?
+There was a stubborn problem I wanted to fix, but I also wanted the machine to feel clean again. I expected a tedious afternoon of reinstalling software. Instead, the reset forced me to work out what “clean” was supposed to mean.
 
-The reflexive answer is "fewer tools." Install less, depend on less, keep the Applications folder short. I held that belief for a long time, and it never survived contact with real work. Six months after any minimal setup, I would find a `~/.zshrc` I no longer understood, three different Python interpreters I did not remember choosing, and a `pip install` from 2023 sitting in a directory it had no business being in. The machine was not cluttered because I had installed too much. It was cluttered because nothing had a clear owner.
+For a long time I treated it as a matter of installing fewer tools. That never lasted. Six months after setting up a supposedly minimal machine, I would have a `~/.zshrc` I no longer understood, three Python interpreters I did not remember choosing, and a `pip install` from 2023 living somewhere it should not have been. The real problem was not the number of tools. I could no longer tell which one owned what.
 
-So this series starts from a different definition. Clean is not minimal. Clean is *layered*, where each layer has a single owner and none of them reach into each other's territory. This first article is the manifesto: the model, the one principle that holds it together, and the test I use to know whether I have actually achieved it. The six articles after it work the model out in practice.
+This is the first of seven articles about the setup I rebuilt after that reset. The rest of the series goes into individual tools; this one records the four-layer model they fit into.
 
-## How an environment rots
+## Reasonable installs add up
 
-It is worth being specific about the failure mode, because it is rarely a single bad decision. It is a sequence of individually reasonable ones.
+The mess usually starts with decisions that make sense on their own.
 
-You run `brew install python` because you need Python and Homebrew is right there. Later a project needs a different version, so you add `pyenv`. A Node project shows up, so you add `nvm`. Then Ruby, so `rbenv`. Each of these tools wants to edit your shell startup file, and each installer appends a few lines to `~/.zshrc` without telling you in any way you would notice. A `pip install --user` drops packages into a location that shadows another tool's expectations. None of it is wrong on its own. Together it is a machine where, if someone asked you "which Python runs when you type `python`, and why," you would have to investigate your own computer to find out.
+I need Python, so I run `brew install python`. A later project needs another version, so I add `pyenv`. Then a Node project brings in `nvm`, and Ruby brings in `rbenv`. Each installer adds a few lines to `~/.zshrc`, often too quietly for me to notice. A `pip install --user` puts packages in a location that shadows what another tool expects.
 
-That investigation is the symptom. A clean environment is one where you already know the answer, because the answer is structural rather than accidental.
+None of those choices is obviously broken. The problem appears later, when I have to investigate my own computer to answer a basic question: when I type `python`, which Python runs, and why?
 
-## The model: four layers
+I wanted the answer to come from the structure of the setup, not from whatever happened to win the current `PATH`.
 
-Here is the structure I rebuilt the Mac mini around. It is four layers, stacked from the system upward, and the entire series leans on it.
+## The four layers
+
+I rebuilt the Mac mini around four layers, starting with the system and ending with the dependencies stored in each repository.
 
 <figure class="my-6">
 <svg viewBox="0 0 600 330" role="img" aria-labelledby="diagram-layers-title" style="width:100%;height:auto;color:inherit">
@@ -59,51 +61,47 @@ Here is the structure I rebuilt the Mac mini around. It is four layers, stacked 
 </svg>
 </figure>
 
-**Layer 0 — System** is Homebrew plus the Xcode Command Line Tools. It installs command-line tools and graphical applications. It does not install language runtimes. That last sentence is the discipline: the moment Homebrew owns your Python, Layer 0 has reached into Layer 1, and the rot begins.
+**Layer 0 — System.** Homebrew and the Xcode Command Line Tools install command-line tools and graphical applications. They do not install language runtimes. If Homebrew owns Python, the system layer has crossed into the next layer.
 
-**Layer 1 — Runtime version** is the chosen interpreter or compiler version: Python 3.14, Node 22, and so on. On my machine this layer is owned by `mise`, a version manager that switches which runtime is active based on the project you are standing in. The exception, which I will come back to, is languages that ship their own strong version manager.
+**Layer 1 — Runtime version.** This is the selected interpreter or compiler version: Python 3.14, Node 22, and so on. I usually let `mise` own this layer. It activates a runtime according to the project directory I am in.
 
-**Layer 2 — Package manager** is the tool that installs libraries into a project: `uv` for Python, `pnpm` for Node, `cargo` for Rust. It works *within* a runtime version; it does not choose the version.
+**Layer 2 — Package manager.** `uv` installs Python packages, `pnpm` installs Node packages, and `cargo` installs Rust packages. These tools work inside a selected runtime; they do not decide which runtime version is active.
 
-**Layer 3 — Project dependencies** is the declarative files plus lock files that pin a project's libraries: `pyproject.toml` with `uv.lock`, `package.json` with `pnpm-lock.yaml`. This is the layer that travels with the repository and that another machine must be able to reproduce exactly.
+**Layer 3 — Project dependencies.** The manifest and lock files belong to the repository: `pyproject.toml` and `uv.lock`, or `package.json` and `pnpm-lock.yaml`. Another machine should be able to use these files to reproduce the same dependency set.
 
-The layers are drawn as a stack because that is how dependence runs. Layer 3 assumes a package manager; the package manager assumes a runtime version; the runtime sits on the system. Reading downward, each layer trusts the one beneath it to stay in its lane.
+The direction of dependency matters. Project dependencies rely on a package manager; the package manager relies on a runtime; the runtime sits on the system. A tool can serve its own layer without quietly taking over the layer above or below it.
 
-## The principle that holds it together
+## One owner for each kind of resource
 
-The model is only worth anything because of a single rule, and the rule is what I mean by **single source of truth**: each *kind* of resource has exactly one tool responsible for it.
+The practical rule is simple: each kind of resource gets one owner.
 
-One tool owns runtime versions. One tool owns a project's libraries. One tool installs system applications. When a question comes up — "where did this Python come from," "what pins this dependency," "why is this app on my machine" — there is exactly one place the answer can live, because exactly one tool was allowed to create the situation.
+Runtime versions have one owner. A project's libraries have one owner. System applications have one owner. If I ask where a Python came from, what pins a dependency, or why an application is installed, there should be one place to look.
 
-This is why "fewer tools" is the wrong target. A machine with two tools that both think they own Python is dirtier than a machine with five tools that each own one thing cleanly. The number is not the problem. Overlapping ownership is the problem. The whole rest of this series is, in one way or another, the work of deciding *who owns what* and then refusing to let anyone else touch it.
+This is also why counting tools did not help me. Two tools competing to manage Python create more confusion than five tools with separate jobs. What matters is whether their ownership overlaps.
 
-## Sometimes the owner isn't the obvious one
+The owner is not always `mise`. Rust has `rustup`, and Swift has Xcode. Both are strong, official toolchain managers maintained as part of their language ecosystems. When an official tool is good enough to own the runtime and toolchain, I let it do so instead of putting `mise` in front of it. The fifth article in this series explains the test I use for that choice.
 
-There is a wrinkle I want to plant now and resolve later. I said Layer 1 is owned by `mise`. That is true for most languages, but not all of them. Some languages ship their own strong, official version and toolchain manager — `rustup` for Rust, Xcode for Swift — that is part of the language project itself. When such a tool exists and is good, the right owner of Layer 1 is that tool, not `mise`.
+“Single source of truth” therefore describes the ownership, not a favorite product. The tools can change without changing the model.
 
-I will not argue the full case here; that is the fifth article. For now it is enough to notice that "single source of truth" does not name a specific tool. It names a property. The owner of a layer is whichever tool can hold it without contradiction, and sometimes that is the language's own.
+## The recovery test
 
-## Clean means recoverable
+After the reset, recoverability became the useful test.
 
-This brings me back to the Mac mini and to what "clean" finally came to mean for me.
+I should be able to delete caches and build artifacts—`rm -rf` the lot—and rebuild any project on the machine with one command. If that works, the caches really are disposable. If it does not, then something I called “derived” is carrying state that was never declared. I treat that as a layering problem and find the missing source of truth.
 
-It is not minimalism, and it is not aesthetics. A clean environment is a *predictable and recoverable* one. Predictable because every resource has a known owner, so the machine holds no mysteries. Recoverable because the declared state — the lock files, the manifests, the dotfiles — is enough to rebuild the actual state from close to nothing.
+The declared state lives in manifests, lock files, and dotfiles. Together they should be enough to recreate the working state from close to nothing. This makes the setup predictable as well: I know which tool to inspect before I start debugging `PATH`.
 
-The test I now use is concrete. Could I delete all of my caches and build artifacts — `rm -rf` the lot — and rebuild any project on the machine with one command? If yes, then the cache was genuinely disposable, which means it was never load-bearing state pretending to be a tool. If no, then something I thought was derived was actually a source of truth in disguise, and I have a layering bug to fix.
+There are limits to this setup. It is for one person on macOS who controls the whole machine. A team, a shared server, a locked-down corporate laptop, or another operating system can change the trade-offs substantially. `mise` and `uv` are also recent tools, and something else may replace them. Those constraints do not make the setup universal; they explain the environment in which I use it.
 
-That test does not care how many tools I have installed. It cares whether the truth lives in the right places. That is the difference between a machine that is tidy today and one that is still clean after a year of real use.
+## The next six articles
 
-A caveat before the rest of the series, and it applies to all of it. This is one person's setup on macOS, optimized for a single user who controls the whole machine. Teams, shared servers, locked-down corporate laptops, and other operating systems change the trade-offs, sometimes a lot. I am describing principles I would defend, not laws I would impose. The specific tools will also change — `mise` and `uv` are recent, and something will replace them — but the layering and the single-source rule are what I expect to outlast them.
+The remaining articles take one part of the setup at a time:
 
-## What the next six articles cover
+- **Dotfiles without `.zshrc`** covers `ZDOTDIR` and `chezmoi`, making shell configuration declarative, exposing drift, and keeping the home directory from becoming a configuration dump.
+- **The Brewfile compromise** explains why eventual consistency is acceptable at the system layer and how a reconcile step keeps it honest without pretending it is strict.
+- **Python, mise, and uv** deals with `uv` quietly installing its own Python behind `mise` and the single setting that stops the conflict.
+- **When to let the official tool win** gives the test for choosing a language's own version manager instead of `mise` at Layer 1.
+- **One architecture, many languages** applies the same four layers to Node, Java, Swift, Rust, Go, and Ruby.
+- **Configuration is easy; maintenance is the work** covers health checks, subtraction, and the ongoing work required to keep the environment understandable.
 
-The rest of the series works the model out in practice. Each piece stands on its own; you can read whichever one matches the problem in front of you.
-
-- **Dotfiles without `.zshrc`** — using `ZDOTDIR` and `chezmoi` to make shell configuration declarative and drift visible, so the home directory stops being a config dump.
-- **The Brewfile compromise** — why the system layer is fine with eventual consistency, and how a reconcile step keeps it honest without pretending it is strict.
-- **Python, mise, and uv** — the conflict where `uv` quietly installs its own Python behind `mise`'s back, and the one setting that resolves it.
-- **When to let the official tool win** — the test for whether a language's own version manager should own Layer 1 instead of `mise`.
-- **One architecture, many languages** — the same four layers made concrete for Node, Java, Swift, Rust, Go, and Ruby.
-- **Configuration is easy; maintenance is the work** — health checks, the discipline of subtraction, and why keeping an environment clean matters more than making one.
-
-The full list, with status and links, lives on the [series index](/series/sovereign-tools). I would start wherever your own machine is currently lying to you about who owns what.
+The [series index](/series/sovereign-tools/) has the complete reading order and current status.

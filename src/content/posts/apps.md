@@ -11,21 +11,21 @@ lang: en
 translationKey: apps
 ---
 
-I do not keep my Brewfile strictly in sync with what is installed on my machine, and that is a deliberate choice rather than laziness I have failed to fix.
+My Brewfile is often slightly out of sync with the applications installed on my Mac. I am fine with that.
 
-This sounds like it contradicts the rest of the series. The [Python article](/posts/python/) was an argument for tight, single-owner control. The [dotfiles article](/posts/dotfiles/) was about making every stray file accountable. And now I am admitting that my list of installed applications is allowed to drift away from the file that is supposed to declare it. The resolution is the point of this article: strict consistency is the right discipline for some layers and the wrong discipline for others, and applying maximum rigor everywhere is its own kind of mess.
+This is looser than the setup in the [Python article](/posts/python/), where one owner controls the environment, or the [dotfiles article](/posts/dotfiles/), where stray configuration files are something to account for. Applications have a different failure mode, so I do not think they need the same enforcement.
 
-## Consistency is not one-size-fits-all
+## Why I tolerate drift here
 
-The reason **Layer 3 — Project dependencies** needs strict consistency is that its drift is immediate and breaking. If your lockfile says one version of a library and your machine has another, a build fails or, worse, behaves differently than it does in CI. The cost of drift is paid now, loudly, and often by someone other than you. So that layer earns the full ceremony of lock files and exact reproduction.
+**Layer 3 — Project dependencies** needs strict consistency. When a lockfile specifies one version but a developer machine has another, the build may fail or behave differently from CI. The failure is immediate, and somebody else may have to pay for it. Exact versions and reproducible installs are worth the ceremony.
 
-**Layer 0 — System** — the applications and command-line tools Homebrew installs — has a completely different cost structure. If I `brew install` a tool today and forget to write it into my Brewfile, nothing breaks. The tool works. My current machine is fine. The drift only has a cost much later, at the next migration, when I rebuild from the Brewfile and discover the tool is missing. The cost is real but *deferred*, and it is small — I notice the tool is gone, I install it, I add the line I forgot.
+**Layer 0 — System** contains the applications and command-line tools installed by Homebrew. Suppose I run `brew install` today and forget to add the tool to my Brewfile. The current machine still works. I usually discover the omission much later, during a migration, when I restore from the Brewfile and the tool is missing. Then I install it and add the forgotten line.
 
-When the cost of drift is deferred and small, paying a constant tax to prevent it is a bad trade. So this layer gets **eventual consistency**: I allow drift day-to-day and converge periodically via a reconcile step, rather than the strict consistency that Layer 3 requires. The same author, the same machine, two layers, two deliberately different disciplines. The skill is matching the discipline to the cost, not maximizing discipline.
+That is a real cost, but it is deferred and usually small. For this layer, I accept day-to-day drift and reconcile it periodically: **eventual consistency** instead of the strict consistency I use for project dependencies.
 
-## Three channels, in priority order
+## Choosing an installation channel
 
-Before automating anything, it helps to decide *where* an application should come from, because macOS offers several channels and choosing consistently is most of the battle.
+On macOS I use three channels, in this order:
 
 <figure class="my-6">
 <svg viewBox="0 0 600 120" role="img" aria-labelledby="diagram-channels-title" style="width:100%;height:auto;color:inherit">
@@ -46,15 +46,15 @@ Before automating anything, it helps to decide *where* an application should com
 </svg>
 </figure>
 
-**Homebrew first.** A formula (command-line tool) or cask (graphical app) is the default, because Homebrew is already the owner of Layer 0 and a `brew` install is trivially expressible in a Brewfile.
+I try **Homebrew first**. Formulae cover command-line tools and casks cover graphical applications. Homebrew already owns Layer 0 in this setup, and either kind of `brew` installation is easy to record in a Brewfile.
 
-**The Mac App Store second**, via `mas-cli`. The decision between a cask and the App Store comes down to one question: is the app coupled to the Apple ecosystem? Apps that rely on iCloud sync, Family Sharing, or App Store receipts — and apps that are *only* distributed through the store — should come from `mas`. Everything else is cleaner as a cask, because casks update through the same `brew` command as the rest and do not depend on being signed into a store account.
+The **Mac App Store comes second**, through `mas-cli`. I use `mas` when an application depends on the Apple ecosystem—iCloud sync, Family Sharing, or App Store receipts—or is available only from the store. Otherwise I prefer a cask: it updates with the same `brew` command as everything else and does not require a signed-in App Store account.
 
-**A `.dmg` last**, and documented. Some apps ship only as a disk image from the vendor's site. These cannot go in the Brewfile, so they become the one place manual tracking is unavoidable. I keep a `manual-installs.md` listing each one and where it came from, so that "what is on this machine that the Brewfile does not capture" has a written answer instead of living only in my memory.
+A vendor-provided **`.dmg` is the last resort**. These installations cannot be expressed in the Brewfile, so I keep a `manual-installs.md` with the application name and its source. Without that file, the only record of what the Brewfile missed would be my memory.
 
-## One declarative surface
+## One file for the intended state
 
-The reason to prefer `mas` over clicking around the App Store by hand is that `mas-cli` lets App Store apps share the Brewfile with everything else. A Brewfile then looks like:
+`mas-cli` is useful because a `mas` entry lets App Store applications live in the same Brewfile as formulae and casks:
 
 ```ruby
 # Brewfile
@@ -71,13 +71,11 @@ mas "Things 3", id: 904280696
 mas "Xcode", id: 497799835
 ```
 
-Now `brew bundle` can install formulae, casks, and App Store apps in one pass, and a single file declares the intended state of the whole layer. This is the [first article's](/posts/manifesto/) single-source-of-truth idea: one file, one owner for "what applications belong on this machine". The difference from Layer 3 is only in *how strictly* that file and the machine are kept equal — not in whether there is a single source.
+With that file, `brew bundle` installs formulae, casks, and App Store applications in one pass. It is the single source of truth for what belongs on the machine, following the ownership model from the [first article](/posts/manifesto/). The file may temporarily lag behind the machine, but there is still only one declared state.
 
-## The reconcile step
+## How I reconcile it
 
-Eventual consistency is only honest if convergence actually happens. Allowing drift without ever reconciling is not a discipline; it is just drift. So the layer needs a low-friction, periodically-triggered action that brings the declared state back in line with the actual state — **the reconcile step**.
-
-The core of it is a **health-check function** that shows drift in both directions: what is installed but not declared, and what is declared but not installed. I call it `brewdiff`:
+Eventual consistency needs an actual convergence step. Mine starts with a read-only health check called `brewdiff`. It shows drift in both directions: installed but undeclared, and declared but missing.
 
 ```zsh
 # 30-functions.zsh — show drift between the Brewfile and the machine
@@ -93,9 +91,9 @@ brewdiff() {
 }
 ```
 
-The function does not *change* anything. It reports. Seeing drift is what lets me decide, item by item, whether an undeclared tool was a deliberate keeper I forgot to write down or an experiment I should remove.
+This function only reports; it does not change the machine. I can inspect each undeclared item and decide whether it is a tool I meant to keep or an experiment I should remove.
 
-To stop the undeclared list from growing in the first place, a little sugar makes declaring as cheap as installing. `brewadd` installs a package and appends it to the Brewfile in the same motion, so the honest path is also the fast one:
+For ordinary formulae, `brewadd` makes the common case cheaper by installing a package and appending it to the Brewfile in the same operation:
 
 ```zsh
 # install AND declare in one step
@@ -108,7 +106,7 @@ brewadd() {
 }
 ```
 
-And because the reconcile step only works if I am actually reminded to run it, a small function nudges me roughly monthly when a shell starts, based on the age of a timestamp file:
+I also need a reminder, because a reconcile command that I forget to run is not much of a system. When a shell starts, this function checks the age of a timestamp file and nudges me if more than 30 days have passed:
 
 ```zsh
 # remind me to reconcile if it has been > 30 days
@@ -122,9 +120,9 @@ _brewdiff_reminder() {
 _brewdiff_reminder
 ```
 
-(Running `brewdiff` would `touch` that stamp at the end, resetting the clock.) None of this is sophisticated. It is deliberately not sophisticated, because a reconcile step that is any harder than this simply will not happen, and an unused reconcile step is the same as none.
+Running `brewdiff` would `touch` the timestamp at the end and reset the clock. I have kept this deliberately small; any more friction would make the monthly check easy to postpone.
 
-Applying the Brewfile itself fits the chezmoi pattern from the [dotfiles article](/posts/dotfiles/): a `run_onchange_` script re-runs `brew bundle` whenever the Brewfile's contents change, so installing on a new machine — or after editing the Brewfile — is automatic:
+The Brewfile itself follows the chezmoi setup from the [dotfiles article](/posts/dotfiles/). A `run_onchange_` script runs `brew bundle` on a new machine and whenever the Brewfile changes:
 
 ```bash
 # run_onchange_brew-bundle.sh.tmpl
@@ -133,16 +131,16 @@ Applying the Brewfile itself fits the chezmoi pattern from the [dotfiles article
 brew bundle --file="$HOME/.config/homebrew/Brewfile"
 ```
 
-The hash comment is the mechanism: chezmoi re-runs the script only when that line changes, and embedding the Brewfile's checksum means the script fires exactly when the Brewfile is edited.
+The hash in the comment is what triggers the script. Chezmoi sees the line change when the Brewfile checksum changes, so it reruns the command after an edit.
 
-## Reconciling with an agent: auditor, not executor
+## Letting an agent audit the list
 
-I do use an AI agent to help with the monthly reconcile, but the framing matters more than the fact. I give it the `brewdiff` output and ask it to act as an *auditor*: for each undeclared package, tell me what it is and offer a keep-or-drop judgment with a reason. What I do not do is let it rewrite my Brewfile directly.
+For the monthly check, I sometimes give the `brewdiff` output to an AI agent. Its job is to explain each undeclared package and suggest keeping or dropping it, with a reason. It does not edit the Brewfile.
 
-The distinction is not superstition. The Brewfile is a source of truth, and a source of truth should only change through a decision I made and can see. An auditor that says "`pngquant` is an image compressor, probably a one-off, consider dropping" hands me a faster decision while leaving the decision mine. An executor that silently edits the file reintroduces exactly the failure the whole series fights — a second actor mutating an owned resource, so that the file no longer reflects only my intent. The agent compresses the *judgment*, not the *authority*.
+For example, an answer such as “`pngquant` is an image compressor and looks like a one-off; consider dropping it” saves me research time while leaving the decision visible. If the agent rewrote the file directly, a second actor would be changing the source of truth and the Brewfile would no longer represent only my intent. The useful delegation here is judgment, not authority.
 
-## The reframe
+## The command I do not automate
 
-The honest caveat on all of this is about a sharp tool: `brew bundle cleanup` (and the `--cleanup` flag) will uninstall everything not in the Brewfile, which is genuinely useful once your Brewfile is complete — and genuinely destructive before then, when half your real tools are still undeclared. I do not run it with `--force` until `brewdiff` shows a short, well-understood undeclared list. Reaching for strict enforcement before the declaration is trustworthy is how people delete tools they actually wanted.
+`brew bundle cleanup`, including the `--cleanup` flag, uninstalls everything that is not in the Brewfile. That is convenient after the declaration is complete and dangerous while half of the tools I use are still undeclared. I do not run it with `--force` until `brewdiff` produces a short list whose contents I understand.
 
-Which is the whole point, stated one more way. The [manifesto](/posts/manifesto/) defined cleanliness as single-source-of-truth layering. This article adds the dimension the manifesto left implicit: each layer also has a *right amount of strictness*, and it is not always "maximum". Layer 3 gets strict consistency because its drift breaks things now. Layer 0 gets eventual consistency because its drift bites only later and cheaply. Choosing the discipline that fits each domain — rather than reflexively maximizing it everywhere — is itself part of what makes an environment clean. The [maintenance article](/posts/maintenance/) extends this into a habit: the reconcile step here is one instance of a more general practice of making drift visible and converging on a schedule instead of pretending it never happens.
+The monthly review is one case of the broader maintenance routine in the [maintenance article](/posts/maintenance/): make drift visible, inspect it, and converge on a schedule. For Mac applications, that has been enough. I do not need every installation to update the Brewfile immediately; I need omissions to remain visible and cheap to repair.

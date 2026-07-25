@@ -12,127 +12,127 @@
 			"key": "ai-made-code-cheap",
 			"source": "en",
 			"priority": "high",
-			"targets": { "zh": "published", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "i-turned-my-ai-workflow-into-code",
 			"source": "en",
 			"priority": "high",
-			"targets": { "zh": "published", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "whats-new-in-swift-wwdc26",
 			"source": "en",
 			"priority": "high",
-			"targets": { "zh": "published", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "reading-swift-function-signatures",
 			"source": "en",
 			"priority": "high",
-			"targets": { "zh": "planned", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "swift-for-static-sites",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "planned", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "the-raptor-dilemma",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "planned", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "building-personal-website-in-swift",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "planned", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "apple-music-style-navigation-titles",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "planned", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "manifesto",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "dotfiles",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "apps",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "python",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "sovereignty",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "polyglot",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "maintenance",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "deploy-minecraft-server-with-docker",
 			"source": "en",
 			"priority": "low",
-			"targets": { "zh": "backlog", "ja": "backlog" }
+			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
 			"key": "computer-architecture",
 			"source": "ja",
 			"priority": "low",
-			"targets": { "en": "backlog", "zh": "backlog" }
+			"targets": { "en": "not-planned", "zh": "not-planned" }
 		},
 		{
 			"key": "graph-theory-graphs",
 			"source": "ja",
 			"priority": "low",
-			"targets": { "en": "backlog", "zh": "backlog" }
+			"targets": { "en": "not-planned", "zh": "not-planned" }
 		},
 		{
 			"key": "graph-theory-trees",
 			"source": "ja",
 			"priority": "low",
-			"targets": { "en": "backlog", "zh": "backlog" }
+			"targets": { "en": "not-planned", "zh": "not-planned" }
 		},
 		{
 			"key": "sorting-algorithms",
 			"source": "ja",
 			"priority": "low",
-			"targets": { "en": "backlog", "zh": "backlog" }
+			"targets": { "en": "not-planned", "zh": "not-planned" }
 		},
 		{
 			"key": "graph-algorithms",
 			"source": "ja",
 			"priority": "low",
-			"targets": { "en": "backlog", "zh": "backlog" }
+			"targets": { "en": "not-planned", "zh": "not-planned" }
 		}
 	]
 }

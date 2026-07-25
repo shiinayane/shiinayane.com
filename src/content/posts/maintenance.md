@@ -1,7 +1,7 @@
 ---
 title: "Configuration Is Easy; Maintenance Is the Work"
 published: 2026-05-30
-description: "Setting up a clean environment is the easy part. Keeping it clean is the real work — and most of that work is subtraction."
+description: "A clean development environment drifts quietly. These small checks make that drift visible before cleanup becomes a project of its own."
 tags: [macos, mise, maintenance]
 category: Engineering
 series: "sovereign-tools"
@@ -11,23 +11,23 @@ lang: en
 translationKey: maintenance
 ---
 
-Every clean environment I have ever built was clean for about six months. Then I looked closely and found three Python versions where I expected one, a Brewfile that no longer matched the machine, and a `mise list` full of runtimes I had installed for some experiment I could not even remember. Nothing had broken. It had just drifted, quietly, the way every system does the moment you stop watching it.
+Every clean environment I have built has stayed clean for about six months. The last time I looked closely, I found three Python versions where I expected one, a Brewfile that no longer described the machine, and a `mise list` full of runtimes installed for experiments I could no longer remember. Nothing was broken. The machine had simply drifted while I was using it.
 
-This is the last article in the series, and it is the one I think matters most, because it corrects the impression the other six might leave. Those articles were about configuration: the layers, the settings, the dotfiles. Configuration is a one-time act, and it is the easy part. Keeping the environment clean afterward is a continuous one, and that is the actual work. The good news is that the work is small and mostly consists of *removing* things — if you build the habit of seeing drift before it accumulates.
+This is the last article in the series. The previous six covered configuration—layers, settings, and dotfiles—but that is the part I can finish in an afternoon. Whether the setup is still clean a year later depends on a much smaller, recurring job: noticing drift and removing what no longer belongs.
 
-## Three kinds of drift
+## What drift looks like
 
-The **drift** (divergence between declared state and actual machine state) that erodes a clean setup comes in three recognizable forms, and each was foreshadowed by an earlier article.
+I usually find one of three things.
 
-The first is **silent auto-install**: a tool provisions something behind your back, the way `uv` downloaded its own Python in the [Python article](/posts/python/). This is the most insidious kind because nothing prompts you — the machine simply gains state you did not choose. The defense is mostly the declarative settings from earlier (`python-preference = only-system` turns a silent download into a visible error), but no set of settings catches everything, so you also need to be able to look.
+**Silent auto-install.** A tool provisions something without asking, as `uv` did with its own Python in the [Python article](/posts/python/). The machine gains state I did not choose, and there may be no warning at all, which makes this the easiest kind of drift to miss. Declarative settings prevent some of it: `python-preference = only-system`, for example, turns that silent download into a visible error. They do not catch every tool, so I still need a way to inspect the result.
 
-The second is **forgotten sync**: you install something deliberately and forget to declare it, so the Brewfile from the [apps article](/posts/apps/) slowly falls behind reality. This drift is benign until a migration, at which point it becomes a pile of "oh, I forgot I had that". The defense is the reconcile step.
+**Forgotten sync.** I install something deliberately but forget to declare it. The Brewfile from the [apps article](/posts/apps/) then falls behind the actual machine. This rarely matters day to day; it matters during a migration, when every missing entry becomes “oh, I forgot I had that.” The fix is to reconcile the two states before I need the file for recovery.
 
-The third is **accumulated cruft**: runtimes, tools, and packages you genuinely installed on purpose, used once, and never removed. This is the hardest because nothing is wrong with any individual item. It is the accumulation itself that is the problem, and accumulation has no error message.
+**Accumulated cruft.** A runtime, global tool, or package was installed intentionally, used once, and never removed. This is the hardest kind to clean up: each item is valid on its own, so nothing reports an error. Only the accumulated list reveals the problem.
 
-## Make drift visible
+## A health check should only make drift visible
 
-You cannot maintain what you cannot see, so the foundation of upkeep is a small set of **health-check functions** — shell functions that surface drift on demand. The series has already introduced two: `brewdiff` for the Brewfile, and `zhealth` for stray zsh files in the home directory. The Python layer deserves its own, because the silent-install drift is so easy to miss. I call it `pyversions`, and it lines up every answer to "which Python" so a disagreement is obvious at a glance:
+I keep a few shell functions for this. Earlier articles introduced `brewdiff`, which compares the installed applications with the Brewfile, and `zhealth`, which finds stray zsh files in the home directory. Python needs a similar check because it is particularly easy for several tools to acquire different interpreters without making the disagreement obvious:
 
 ```zsh
 # 30-functions.zsh — surface Python version drift across tools
@@ -41,15 +41,23 @@ pyversions() {
 }
 ```
 
-When `mise current`, the shell's `python`, and `uv run python` all agree, the layer is healthy. When they diverge, something owns a Python it should not, and I go find it — exactly the investigation the Python article walked through, now reduced to one command I can run any time I am suspicious.
+`pyversions` puts the shell's `python`, `mise current`, `uv run python`, and the installed `mise` versions in one view. If the first three agree, the Python layer is healthy. If they do not, some tool owns a Python I did not expect, and I can repeat the investigation from the Python article without first rediscovering all the commands.
 
-The point generalizes past Python. A health check is just a function that compares declared state to actual state and prints the difference. `mise list` audited against the `mise.toml` files I actually use, `brew bundle check` against the Brewfile, `zhealth` against the expectation that `$HOME` holds one zsh file — each makes a category of drift visible in seconds. None of them fix anything. They report, and reporting is what turns drift from something you discover by accident into something you can choose to act on.
+The same pattern covers the other layers:
 
-## The work is mostly subtraction
+- compare `mise list` with the `mise.toml` files I actually use;
+- compare the machine with the Brewfile through `brew bundle check`;
+- compare the contents of `$HOME` with the expectation that it contains one zsh file.
 
-Here is the part that took me longest to learn. A mature clean environment is not the one with the most carefully configured tools. It is the one with the *fewest tools that are not actually used*. The defining move of maintenance is removal, not addition.
+These checks do not repair anything. That is intentional. A small reporting command is easy to trust and easy to run; it turns drift from a surprise into a decision.
 
-I run a simple test against anything questionable: **have I actually used this in the last 30 days?** If a runtime, a global tool, or an installed application has not been touched in a month, it is a candidate for removal — not an automatic deletion, but a thing I now have to justify keeping. `mise` makes this concrete for runtimes:
+## The 30-day test
+
+For me, a mature setup is one with very few tools that are no longer used. That makes maintenance mostly a matter of subtraction.
+
+For anything questionable, I ask whether I have actually used it in the last 30 days. A runtime, global tool, or application that has gone untouched for a month becomes a candidate for removal—not an automatic deletion, but something that now needs a reason to stay.
+
+For `mise` runtimes, the pass is concrete:
 
 ```bash
 $ mise list                 # what's installed
@@ -57,23 +65,21 @@ $ mise uninstall python@3.11 # remove a version no project uses
 $ mise prune                 # drop versions nothing references
 ```
 
-The [Ruby decision](/posts/polyglot/) from the previous article is the same instinct applied earlier, before installation rather than after. The system Ruby being old is not a reason to install a `mise`-managed Ruby on a machine with no Ruby projects. Installing on demand instead of preemptively is just subtraction performed in advance — the tool you never install is the easiest one to keep clean.
+The [Ruby decision](/posts/polyglot/) in the previous article applies the same test before installation. An old system Ruby is not, by itself, a reason to add a `mise`-managed Ruby to a machine with no Ruby projects. Waiting until a project needs it avoids creating another runtime to audit and eventually remove.
 
-## Why removal is hard, and how to make it happen
+I do this as a periodic cleanup instead of waiting until I feel motivated. Installing a new tool feels productive; removing one feels like losing something or admitting the original installation was a mistake. Sunk cost makes leaving it alone even easier. A schedule is less dramatic: run the checks, review what has not been used for 30 days, and remove what I cannot justify.
 
-If subtraction is so clearly right, why is every developer's machine a museum of unused tools? Because we are wired against it. Adding a tool feels like progress — there is a small reward in installing something new and imagining the problems it will solve. Removing one feels like loss, and worse, it can feel like admitting the original install was a mistake. Sunk cost and the discomfort of being wrong both push toward keeping things, and neither pushes back.
+An empty line in `mise list`, a short Brewfile, or a home directory with one dotfile is not missing configuration. Sometimes it is the desired result.
 
-The counter is to not rely on feeling like removing things in the moment, because you never will. Instead, schedule it. A periodic subtraction pass — run the health checks, look at what has not been used in 30 days, remove what you cannot justify — turns removal from an emotional decision into a routine one. It helps to reframe the goal, too: an empty line in `mise list`, a short Brewfile, a home directory with one dotfile are not gaps waiting to be filled. They are the target. A machine that does less is not under-provisioned; it is clean.
+## Do not turn maintenance into another system
 
-There is an irony to guard against, and it is the honest caveat for this whole article. It is entirely possible to over-engineer the maintenance itself — to build an elaborate dashboard of health checks and scheduled jobs that becomes its own maintenance burden, a new thing to keep clean. The reconcile steps only work if they stay low-friction; a `brewdiff` you run in two seconds gets run, and a monitoring system you have to maintain does not. If keeping the environment clean starts to cost more than the mess would have, the cure has become the disease. Keep the tools small enough that using them is never the hard part.
+The cleanup itself can drift into over-engineering. It would be easy to build a dashboard, scheduled jobs, and a collection of checks elaborate enough to require their own maintenance.
 
-## The sixth layer
+That defeats the point. A `brewdiff` that takes two seconds gets used. A monitoring system that needs attention does not. Reconciliation only remains useful while its cost is lower than the mess it prevents, so I keep these tools small and let them report rather than automate every decision.
 
-The [manifesto](/posts/manifesto/) opened this series with four layers: System, Runtime version, Package manager, Project dependencies. After living with them, I think there is a fifth thing holding the stack up that none of the four can supply, and it is not a tool you install. It is the discipline to keep looking — to run the health check, to do the subtraction pass, to treat drift as something you converge on a schedule rather than something you notice when it finally breaks.
+The [manifesto](/posts/manifesto/) started this series with four layers: System, Runtime version, Package manager, and Project dependencies. There is a fifth part that none of those layers can provide: occasionally looking at the machine, comparing it with the declared state, and bringing the two back together before something breaks.
 
-That is the real conclusion. Cleanliness is not a state you reach and then possess. It is a process you keep running, at low cost, indefinitely. The configuration articles in this series describe a machine you can set up in an afternoon. This one describes the habit that determines whether it is still clean a year later, and the habit is worth more than any of the settings.
-
-So the closing suggestion is not to install anything. It is to run one health check on your machine right now — `which python` and `uv run python --version`, or just look at how many things are in your `mise list` that you have not touched in a month. See how far your environment has already drifted while you were not watching. That gap, between what you think is on your machine and what actually is, is the work. The whole series has only ever been about making it small, and keeping it that way.
+On a machine I have not checked recently, I start with `which python` and `uv run python --version`, then look through `mise list` for anything untouched in a month. That is usually enough to show whether the environment I remember is still the one I have.
 
 ---
 

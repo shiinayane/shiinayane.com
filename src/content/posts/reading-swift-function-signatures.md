@@ -1,5 +1,5 @@
 ---
-title: From Hating Swift Function Signatures to Actually Enjoying Them
+title: How I Learned to Read Swift Function Signatures
 published: 2026-05-07
 tags: [Swift, Programming]
 category: Engineering
@@ -8,9 +8,7 @@ lang: en
 translationKey: reading-swift-function-signatures
 ---
 
-When I first started learning Swift, I absolutely hated reading function signatures.
-
-Opening Apple’s DocC documentation for the first time felt like staring at some kind of ancient spellbook:
+When I started learning Swift, I would open Apple’s DocC documentation, see something like this, and skip straight to the examples:
 
 ```swift
 func compactMap<ElementOfResult>(
@@ -18,47 +16,22 @@ func compactMap<ElementOfResult>(
 ) rethrows -> [ElementOfResult]
 ```
 
-My honest reaction was:
+My honest reaction was: “Why the hell does one function need to look this terrifying?”
 
-> “Why the hell does a single function need to look this terrifying?”
-
-Compared to Python, Swift felt absurdly verbose.
-
-Python APIs looked simple and friendly:
+Python had taught me to expect APIs that looked more like this:
 
 ```python
 map(func, arr)
 filter(func, arr)
 ```
 
-Meanwhile Swift kept throwing things at me like:
+The Swift version seemed to pack generics, `Optional`, associated types, protocol constraints, `throws`, and `rethrows` into the same line. I treated all of that as syntax to get past, not information worth reading.
 
-* generics
-* Optional
-* associated types
-* protocol constraints
-* throws
-* rethrows
+That worked for copying an example. It did not help much when I had to understand an unfamiliar API on my own.
 
-all packed into one line.
+## Reading the arrows first
 
-At first, I completely ignored signatures and jumped straight to example code. I treated the type system as noise.
-
-But somewhere along the way, something changed.
-
-Now I sometimes find myself reading only the function signature and immediately understanding what the API is supposed to do.
-
-That transition felt surprisingly satisfying.
-
----
-
-## Swift Is Not Trying to Be Complicated
-
-Eventually I realized Swift signatures are not “complex for the sake of complexity.”
-
-Swift is trying to make implicit information explicit.
-
-Take this:
+The signature that made this easier was `map`:
 
 ```swift
 func map<T>(
@@ -66,46 +39,28 @@ func map<T>(
 ) rethrows -> [T]
 ```
 
-At first glance, it looks intimidating.
+I no longer try to understand every symbol at once. I start with the value flowing through the function:
 
-But once you learn how to read it, it becomes incredibly descriptive.
+- the method works on a collection of `Element`;
+- its closure accepts one `Element`;
+- the closure produces some type `T`;
+- `map` collects those values into `[T]`;
+- the closure is allowed to throw;
+- because the method is `rethrows`, `map` throws only when the closure passed to it throws.
 
-You can almost mechanically decompose it:
+Read that way, the type signature is already a compact description of the operation. The generic name does not tell me what `T` is, but it tells me that the input element and output value do not have to be the same type.
 
-* map
-* takes an Element
-* transforms it into T
-* returns [T]
-* the closure may throw
-* map itself only throws if the closure throws
+## `map`, `compactMap`, and `flatMap`
 
-At some point I realized:
+These three methods were where signatures first became more useful to me than memorized examples.
 
-> the type signature itself is documentation.
-
-Sometimes better documentation than paragraphs of prose.
-
----
-
-## The Moment Things Started Clicking
-
-The real turning point for me was understanding the difference between:
-
-* map
-* compactMap
-* flatMap
-
-At first I only knew how to use them mechanically.
+At first, I only knew the call pattern:
 
 ```swift
 arr.map { ... }
 ```
 
-worked, but I did not really understand the deeper idea behind them.
-
-Then I forced myself to read the signatures carefully.
-
-For example:
+Then I compared the return types and the closure return types. `compactMap` has an extra `?` in one crucial place:
 
 ```swift
 func compactMap<ElementOfResult>(
@@ -113,13 +68,9 @@ func compactMap<ElementOfResult>(
 ) rethrows -> [ElementOfResult]
 ```
 
-That was the first time I truly understood:
+The transform may return either an `ElementOfResult` or `nil`, but the final array contains non-optional `ElementOfResult` values. In practical terms, it transforms every input and discards the `nil` results. That is the part I had previously remembered only as “use this when optionals are involved.”
 
-> compactMap is basically:
->
-> “map Optional values, then flatten away nil.”
-
-And then came this monster:
+The sequence overload of `flatMap` looks heavier:
 
 ```swift
 func flatMap<SegmentOfResult>(
@@ -128,81 +79,49 @@ func flatMap<SegmentOfResult>(
 where SegmentOfResult : Sequence
 ```
 
-This one finally made me understand what flatMap actually means.
+The `where` clause says that each transformed result must itself be a `Sequence`. The return type then gives away the rest: the method returns an array of that inner sequence’s elements, not an array of sequences.
 
-Not “advanced map.”
-
-Not “magic.”
-
-But simply:
-
-> flattening nested containers.
-
-Like turning:
+So a nested value such as:
 
 ```plain
 [[1], [2,2], [3,3,3]]
 ```
 
-into:
+can become:
 
 ```plain
 [1,2,2,3,3,3]
 ```
 
-That moment completely changed how I viewed Swift APIs.
+Once I saw that relationship in the types, `flatMap` stopped feeling like an “advanced map.” For this overload, it means transforming elements into sequences and flattening those sequences into one array.
 
----
+## Small signatures also carry policy
 
-## Swift’s Type System Is Trying to Tell You a Story
-
-One thing I slowly began to appreciate is that Swift signatures are extremely intentional.
-
-For example:
+Not every useful signature is full of generics. This one tells me almost everything I need to know:
 
 ```swift
 func popLast() -> Element?
 ```
 
-already tells you:
+The result is optional, so an empty collection is represented by `nil`. I do not need to guess whether absence is a valid result.
 
-* this operation may fail
-* failure is represented safely with Optional
-* no crash on empty arrays
-
-without reading a single sentence of explanation.
-
-Or compare:
+That also makes the difference between these two names worth noticing:
 
 ```swift
 removeLast()
 ```
 
-vs
+and:
 
 ```swift
 popLast()
 ```
 
-The naming itself communicates risk.
+`removeLast()` requires the collection to be nonempty and traps otherwise. `popLast()` handles the empty case by returning `nil`. The names hint at the difference, while the optional return type makes it explicit.
 
-Swift APIs often feel like they were designed not just for machines, but for human reasoning.
+## A small vocabulary covers a lot
 
----
-
-## Reading Signatures Became More Important Than Reading Tutorials
-
-At some point I noticed a strange shift in how I learn Swift.
-
-I stopped asking:
-
-> “How do I use this API?”
-
-and started asking:
-
-> “What is this type signature trying to express?”
-
-Because once you can read things like:
+After a while, I found that many intimidating signatures were combinations of a few forms:
 
 ```swift
 (Element) -> T
@@ -211,58 +130,31 @@ Sequence<Element>
 where T : BinaryInteger
 ```
 
-you start understanding the relationships between types instead of memorizing syntax.
+I read them as:
 
-And that changes everything.
+- a function from `Element` to `T`;
+- a function that may or may not produce a `T`;
+- a sequence whose element type is `Element`;
+- a generic `T` constrained to conform to `BinaryInteger`.
 
----
+This is more useful than memorizing one call site because the same relationships appear across the standard library and third-party APIs.
 
-## Swift’s “Complexity” Is Really Compile-Time Safety
+## Where the complexity goes
 
-I think Swift intentionally chooses:
+Swift often asks me to accept:
 
 ```plain
 more complexity during compilation
 ```
 
-instead of:
+rather than leave:
 
 ```plain
 more uncertainty at runtime
 ```
 
-The language wants invalid states to become difficult — or impossible — to express.
+The trade is not absolute, but the compiler and the type system can catch or represent some of that uncertainty earlier.
 
-That is why Swift leans so heavily into:
+`Optional`, generics, protocol-oriented APIs, type constraints, and explicit error handling all contribute to the longer signatures that initially put me off. They do not make every invalid state impossible, and a signature cannot replace all documentation. But it can expose input, output, failure, and type relationships before I run the code.
 
-* Optional
-* generics
-* protocol-oriented design
-* type constraints
-* explicit error handling
-
-At first it feels exhausting.
-
-But once the mental model clicks, those terrifying signatures start becoming surprisingly readable.
-
-Even elegant.
-
----
-
-## The Real Shift Was Not Technical
-
-Looking back, the biggest change was not that I suddenly became better at Swift.
-
-It was that I stopped treating the type system as an obstacle.
-
-I started treating it as communication.
-
-And somewhere between:
-
-> “Why is this signature so long?”
-
-and
-
-> “Let me read the signature first.”
-
-I realized I had finally started thinking in Swift.
+I still open examples when a type is unfamiliar. The difference is that I now read the signature first, then use the example to confirm the model I got from it.

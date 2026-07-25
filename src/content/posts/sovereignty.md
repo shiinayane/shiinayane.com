@@ -11,24 +11,22 @@ lang: en
 translationKey: sovereignty
 ---
 
-There is a contradiction sitting at the center of this series, and a careful reader of the [previous article](/posts/python/) will have spotted it. I argued that `mise` should be the single owner of Python versions, and that `uv` managing its own Python was a problem to be corrected. But I also use `rustup` to manage Rust, and `mise` is perfectly capable of managing Rust too. So why is `uv` owning Python wrong while `rustup` owning Rust is right? Both are cases of a language-specific tool managing a runtime that `mise` could otherwise handle.
+The [previous article](/posts/python/) made `mise` the single owner of Python versions and kept `uv` at the dependency layer. On the same machine, though, I let `rustup` own Rust even though `mise` can install Rust too.
 
-If the answer were a list — "use `mise` for these languages, the official tool for those" — it would be worth memorizing and nothing more. It is more useful than that. There is a single test underneath, and once you can run it, you do not need the list; you can derive it, including for languages that do not exist yet.
+The difference is not a special exception for Rust. Before assigning Layer 1—the runtime version—I ask one question: **does this language have a strong, official sovereign tool?**
 
-## The test
+## What counts as a sovereign tool
 
-The test is one question: **does this language have a strong, official sovereign tool?**
+Here, a **sovereign tool** means an official version and toolchain manager that belongs to the language project itself. `rustup` for Rust and Xcode for Swift are the clearest examples. If one exists and is strong, I leave the layer to it. If the official option is absent or too limited, `mise` fills the gap.
 
-A **sovereign tool**, in the vocabulary of this series, is a language's strong, official version and toolchain manager that is part of the language project itself. `rustup` for Rust and Xcode for Swift are the clear examples. When such a tool exists and is strong, you defer to it; `mise` should not compete. When it does not exist, or exists but is weak, `mise` fills the gap.
+“Official” alone is not enough. I look for four things:
 
-That pushes the weight onto the word *strong*, so the test needs sharper criteria. An official tool is strong when it:
+1. **It is part of the language project.** It comes from the people shipping the compiler, rather than a third party trying to catch up with it.
+2. **It owns more than a version switch.** That can include toolchain components, stable/beta/nightly channels, cross-compilation targets, and project pins recognized across the ecosystem. Merely selecting the active version is already something `mise` handles well.
+3. **The community has converged on it.** “How do I install this language?” should have one routine, near-universal answer. Three competing answers mean there is no sovereign tool yet.
+4. **Its contract is stable across upgrades.** Giving a tool this layer for years only works if routine upgrades do not break existing projects.
 
-1. **Is part of the language project**, not a third-party add-on. It ships from the same people who ship the compiler, so it tracks the language's evolution rather than chasing it.
-2. **Manages more than version switching.** A mere "which version is active" toggle is something `mise` already does well. A sovereign tool earns deference by owning things `mise` cannot reasonably own — toolchain components, release channels (stable/beta/nightly), cross-compilation targets, project-level pins that the whole ecosystem respects.
-3. **Has community consensus.** When the question "how do I install this language" has one boring, near-universal answer, that answer is a sovereign tool. When the community is split across three approaches, there is no sovereign to defer to.
-4. **Does not break existing projects when it upgrades.** A tool you can let own a layer for years has to be stable in its contract, not just capable today.
-
-`rustup` passes all four cleanly. It is Rust's own, it manages toolchains and targets and channels far beyond version switching, it is the unanimous answer to "how do I install Rust", and it has been contract-stable for years. Contrast Go's official `dl` installer, which fetches a specific Go version but does little beyond that and has no real claim to own version management as a discipline. It is official but *weak* — it does not clear bars 2 and 3 — so it does not earn deference the way `rustup` does.
+`rustup` clears all four: it is part of Rust, manages toolchains, targets, and release channels, is the standard installation path, and has kept a stable contract for years. Go's official `dl` installer is a useful counterexample. It fetches a particular Go version, but does little beyond that and has not become the accepted owner of version management. It is official, but it does not clear criteria 2 and 3, so I still treat it as weak.
 
 <figure class="my-6">
 <svg viewBox="0 0 600 300" role="img" aria-labelledby="diagram-sov-title" style="width:100%;height:auto;color:inherit">
@@ -60,23 +58,21 @@ That pushes the weight onto the word *strong*, so the test needs sharper criteri
 </svg>
 </figure>
 
-## Running the test across the ecosystems
+## Applying it to the languages I use
 
-With the test in hand, each language resolves quickly. **Layer 1 — Runtime version** is the layer in question throughout; the only thing changing is who owns it.
+These judgments are all about Layer 1: the runtime version.
 
-- **Python** — no sovereign tool. There is no single official version manager; the field is `pyenv`, `mise`, `uv`, the system Python, and others. So `mise` fills the gap, and `uv` is held to Layer 2, exactly the arrangement the [Python article](/posts/python/) arrived at.
-- **Rust** — yes, `rustup`. Defer. `mise` does not install Rust on my machine; `rustup` does.
-- **Node.js** — no sovereign tool. `nvm`, `fnm`, `volta`, `mise` all compete, none is *the* official answer. `mise` fills the gap.
-- **Java** — no sovereign tool, and the additional wrinkle that "Java" is many distributions. `mise` fills the gap, defaulting to Temurin, which sidesteps the distribution question with a sane neutral choice.
-- **Swift / iOS** — yes, Xcode. It is not just a version manager; it *is* the toolchain, the SDK, and the build system, shipped by Apple. Defer completely. Installing Swift through anything other than Xcode on macOS is swimming upstream.
-- **Go** — official but weak, as discussed. There is no strong sovereign to defer to, so `mise` is comfortable owning Go, and most people are happy with that.
-- **Ruby** — no sovereign tool (`rbenv`, `rvm`, `chruby`, `mise` all exist). `mise` fills the gap when Ruby is needed at all.
+- **Python:** no sovereign tool. `pyenv`, `mise`, `uv`, the system Python, and other approaches coexist. I therefore let `mise` own Layer 1 and keep `uv` at Layer 2, as described in the [Python article](/posts/python/).
+- **Rust:** `rustup` is the sovereign tool. It installs Rust on my machine; `mise` does not.
+- **Node.js:** `nvm`, `fnm`, `volta`, and `mise` compete, with no official answer. I use `mise`.
+- **Java:** there is no sovereign tool, and Java also comes in multiple distributions. I use `mise` with Temurin as the default, a neutral choice that avoids reopening the distribution question for every project.
+- **Swift / iOS:** Xcode owns the toolchain, SDK, and build system and is shipped by Apple. On macOS, installing Swift through another manager means working against the platform, so I defer completely.
+- **Go:** the official option is too weak to own the layer. I am comfortable putting Go under `mise`, as many other users do.
+- **Ruby:** `rbenv`, `rvm`, `chruby`, and `mise` all exist; none is sovereign. When I need Ruby, `mise` owns its version.
 
-Notice that the verdicts split, but the *reasoning* does not. Every line above is the same test producing different answers because the ecosystems are genuinely different. That is what makes it a principle rather than a lookup table.
+## `mise` can be a proxy
 
-## The proxy nuance: mise can defer without disappearing
-
-There is a subtlety that trips people up. Deferring to `rustup` does not necessarily mean `rustup` is the tool you *type*. `mise` supports writing a sovereign-managed language in `mise.toml`:
+Deferring to `rustup` does not necessarily mean typing `rustup` for every operation. A project can still declare Rust in `mise.toml`:
 
 ```toml
 # mise.toml
@@ -84,27 +80,19 @@ There is a subtlety that trips people up. Deferring to `rustup` does not necessa
 rust = "1.78"
 ```
 
-When you do this, `mise` does not reimplement Rust version management. It calls `rustup` underneath. This is what I call **mise as proxy**: `mise` is a convenience layer presenting a unified interface, while `rustup` remains the actual owner of the toolchain. The single source of truth is still `rustup`; `mise` is just the front desk.
+`mise` delegates to `rustup`; it does not reimplement Rust toolchain management. I think of this as **`mise` as proxy**: it provides the shared interface while `rustup` remains the owner and source of truth.
 
-This gives two legitimate setups, and the only real mistake is blending them inconsistently:
+That leaves two sensible arrangements:
 
-- **(A) rustup-native.** In a pure-Rust project, talk to `rustup` directly. There is no polyglot interface to maintain, and going straight to the sovereign tool is the simplest possible thing.
-- **(B) mise-as-unified-interface.** In a polyglot project that already has a `mise.toml` pinning Python and Node, adding `rust = "1.78"` to the same file means one command — `mise install` — provisions the whole project. The convenience of a single declaration is worth routing Rust through the proxy.
+- **`rustup`-native:** a Rust-only project talks to `rustup` directly. There is no polyglot setup to unify.
+- **`mise` as the project interface:** a polyglot project already pinning Python and Node in `mise.toml` can add `rust = "1.78"`. Then `mise install` provisions the project through one declaration while delegating Rust to `rustup`.
 
-Both are coherent because in both, `rustup` is still the owner. What you should not do is manage the same project's Rust through `rustup` in one breath and `mise` in the next, so that neither file is authoritative — that recreates the two-owners problem the whole series is trying to avoid, just one layer up.
+The trap is mixing these arrangements inside one project until neither file is authoritative. The interface may be `mise` or `rustup`, but ownership of the Rust toolchain must remain with `rustup`.
 
-## Why the logic beats the list
+## The answers can change
 
-The reason to internalize the test rather than the verdicts is that the verdicts are temporary and the test is not.
+I used the same test when looking at Zig. At the time, it did not have a strong official manager with community consensus, so `mise` or a simple manual installation was reasonable. Mojo falls into the same young-ecosystem category. Haskell is a useful edge case: GHCup is strong enough that deferring to it makes sense. Lua has no consensus tool, so `mise` fills the gap.
 
-New languages keep appearing. When I first looked at Zig, I did not need an article telling me whether to put it under `mise`; I ran the test. Does Zig ship a strong, official version and toolchain manager that the community has consolidated around? At the time, not really — so `mise` (or a simple manual install) fills the gap, the same verdict the test gives for any young language without a settled story. The same goes for Mojo, or for whatever shows up next. Edge cases resolve the same way: Haskell has GHCup, which is strong enough that deferring to it is reasonable; Lua has no consensus tool, so `mise` fills the gap. I did not memorize any of these. I ran one question against each.
+These are current judgments, not permanent assignments. If Python eventually ships a strong official manager and the community converges on it, I would move Python out of `mise` and defer to that tool just as I defer to `rustup` today.
 
-This is also why the test is robust to the ecosystems changing underneath it, which they will. The clearest caveat I can offer is about my own strongest claim: if Python ever ships an official, strong sovereign tool that the community consolidates around, the verdict for Python *flips* — you would defer to it and retire `mise` from owning Python, exactly as you defer to `rustup` today. That would not refute anything here. It would be the principle working as intended. The verdicts are outputs; the test is the thing to keep.
-
-## The same principle, one layer up
-
-Step back and this is not a new idea at all. The [first article](/posts/manifesto/) defined cleanliness as single ownership: each kind of resource has exactly one tool responsible for it. This article has been about a question that definition left implicit — *who* should the one owner be?
-
-The answer is not "always `mise`" and not "always the language's own tool". It is: whichever tool can hold the layer without contradiction. For Python today, that is `mise`, because no sovereign tool exists to hold it better. For Rust, it is `rustup`, because a strong sovereign tool exists and reaching past it would be the contradiction. The single-source principle never told you the owner had to be the same tool everywhere. It only told you there had to be exactly one. The test in this article is just how you find out which one, for each language, today.
-
-The [next article](/posts/polyglot/) takes these verdicts and makes them concrete — the recommended stack, the pitfalls, the lockfiles, and the `gitignore` patterns for each language, so the principle turns into something you can copy into a real project.
+The [first article](/posts/manifesto/) said that each kind of resource should have one owner. This test decides who that owner is for runtime versions. The [next article](/posts/polyglot/) turns the resulting choices into a concrete stack, including the pitfalls, lockfiles, and `gitignore` patterns for each language.
