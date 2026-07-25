@@ -6,6 +6,7 @@ tags: [AI, Codex, Engineering, Workflow]
 category: Engineering
 draft: false
 lang: en
+translationKey: i-turned-my-ai-workflow-into-code
 ---
 
 In the previous article, I wrote about the workflow that emerged while building BiliKit, a Swift project that passed 21,000 lines before reaching version 1.

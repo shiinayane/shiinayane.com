@@ -13,6 +13,7 @@ const postsCollection = defineCollection({
 		tags: z.array(z.string()).optional().default([]),
 		category: z.string().optional().nullable().default(""),
 		lang: z.string().optional().default(""),
+		translationKey: z.string().optional().default(""),
 
 		/* Series grouping (e.g. "sovereign-tools"). seriesOrder positions the
 		   post within its series; both are optional so non-series posts are

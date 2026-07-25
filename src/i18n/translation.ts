@@ -10,6 +10,7 @@ import { tr } from "./languages/tr";
 import { vi } from "./languages/vi";
 import { zh_CN } from "./languages/zh_CN";
 import { zh_TW } from "./languages/zh_TW";
+import type { Locale } from "./config";
 
 export type Translation = {
 	[K in I18nKey]: string;
@@ -45,4 +46,9 @@ export function getTranslation(lang: string): Translation {
 export function i18n(key: I18nKey): string {
 	const lang = siteConfig.lang || "en";
 	return getTranslation(lang)[key];
+}
+
+export function translate(locale: Locale, key: I18nKey): string {
+	const translationLocale = locale === "zh" ? "zh_CN" : locale;
+	return getTranslation(translationLocale)[key];
 }

@@ -2,22 +2,29 @@ import { type CollectionEntry, getCollection } from "astro:content";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getCategoryUrl } from "@utils/url-utils.ts";
+import {
+	type Locale,
+	DEFAULT_LOCALE,
+	normalizeLocale,
+	SUPPORTED_LOCALES,
+} from "@i18n/config";
 
-// // Retrieve posts and sort them by publication date
-async function getRawSortedPosts() {
-	const allBlogPosts = await getCollection("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+export type PostEntry = CollectionEntry<"posts">;
 
-	const sorted = allBlogPosts.sort((a, b) => {
+export function getPostLocale(post: PostEntry): Locale {
+	return normalizeLocale(post.data.lang);
+}
+
+export function getPostTranslationKey(post: PostEntry): string {
+	return post.data.translationKey.trim() || post.slug;
+}
+
+function sortPosts(posts: PostEntry[]): PostEntry[] {
+	return posts.sort((a, b) => {
 		const dateA = new Date(a.data.published).getTime();
 		const dateB = new Date(b.data.published).getTime();
-		// Primary: newest first.
 		if (dateA !== dateB) return dateB - dateA;
 
-		// Same date: keep the home page newest-first by treating a higher
-		// seriesOrder as "newer", so article 7 sits above article 1. (The
-		// series index page sorts ascending for proper reading order.)
 		const sameSeries = !!a.data.series && a.data.series === b.data.series;
 		if (
 			sameSeries &&
@@ -27,26 +34,88 @@ async function getRawSortedPosts() {
 			return b.data.seriesOrder - a.data.seriesOrder;
 		}
 
-		// Final deterministic tiebreaker so the order never depends on the
-		// JS engine's sort when published dates collide.
-		return a.slug.localeCompare(b.slug);
+		return getPostTranslationKey(a).localeCompare(getPostTranslationKey(b));
 	});
-	return sorted;
+}
+
+function connectAdjacentPosts(posts: PostEntry[]): PostEntry[] {
+	for (const post of posts) {
+		post.data.nextSlug = "";
+		post.data.nextTitle = "";
+		post.data.prevSlug = "";
+		post.data.prevTitle = "";
+	}
+	for (let i = 1; i < posts.length; i++) {
+		posts[i].data.nextSlug = getPostTranslationKey(posts[i - 1]);
+		posts[i].data.nextTitle = posts[i - 1].data.title;
+	}
+	for (let i = 0; i < posts.length - 1; i++) {
+		posts[i].data.prevSlug = getPostTranslationKey(posts[i + 1]);
+		posts[i].data.prevTitle = posts[i + 1].data.title;
+	}
+	return posts;
+}
+
+async function getVisiblePosts(): Promise<PostEntry[]> {
+	const allBlogPosts = await getCollection("posts", ({ data }) => {
+		return import.meta.env.PROD ? data.draft !== true : true;
+	});
+	return allBlogPosts;
+}
+
+// Retrieve every post for the legacy, language-neutral routes.
+async function getRawSortedPosts() {
+	const selected = new Map<string, PostEntry>();
+	for (const post of await getVisiblePosts()) {
+		const key = getPostTranslationKey(post);
+		const current = selected.get(key);
+		if (!current || getPostLocale(post) === DEFAULT_LOCALE) {
+			selected.set(key, post);
+		}
+	}
+	return sortPosts(Array.from(selected.values()));
 }
 
 export async function getSortedPosts() {
 	const sorted = await getRawSortedPosts();
+	return connectAdjacentPosts(sorted);
+}
 
-	for (let i = 1; i < sorted.length; i++) {
-		sorted[i].data.nextSlug = sorted[i - 1].slug;
-		sorted[i].data.nextTitle = sorted[i - 1].data.title;
-	}
-	for (let i = 0; i < sorted.length - 1; i++) {
-		sorted[i].data.prevSlug = sorted[i + 1].slug;
-		sorted[i].data.prevTitle = sorted[i + 1].data.title;
-	}
+export async function getLocalizedPosts(locale: Locale): Promise<PostEntry[]> {
+	const localized = (await getVisiblePosts()).filter(
+		(post) => getPostLocale(post) === locale,
+	);
+	return connectAdjacentPosts(sortPosts(localized));
+}
 
-	return sorted;
+export async function getPostTranslations(
+	translationKey: string,
+): Promise<Partial<Record<Locale, PostEntry>>> {
+	const translations: Partial<Record<Locale, PostEntry>> = {};
+	for (const post of await getVisiblePosts()) {
+		if (getPostTranslationKey(post) !== translationKey) continue;
+		translations[getPostLocale(post)] = post;
+	}
+	return translations;
+}
+
+export async function getTranslationManifest(): Promise<
+	Record<string, Locale[]>
+> {
+	const manifest: Record<string, Locale[]> = {};
+	for (const post of await getVisiblePosts()) {
+		const key = getPostTranslationKey(post);
+		const locale = getPostLocale(post);
+		manifest[key] ??= [];
+		if (!manifest[key].includes(locale)) manifest[key].push(locale);
+	}
+	for (const locales of Object.values(manifest)) {
+		locales.sort(
+			(a, b) =>
+				SUPPORTED_LOCALES.indexOf(a) - SUPPORTED_LOCALES.indexOf(b),
+		);
+	}
+	return manifest;
 }
 export type PostForList = {
 	slug: string;
@@ -63,14 +132,24 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 
 	return sortedPostsList;
 }
+
+export async function getLocalizedPostsList(
+	locale: Locale,
+): Promise<PostForList[]> {
+	return (await getLocalizedPosts(locale)).map((post) => ({
+		slug: getPostTranslationKey(post),
+		data: post.data,
+	}));
+}
 export type Tag = {
 	name: string;
 	count: number;
 };
 
-export async function getTagList(): Promise<Tag[]> {
+export async function getTagList(locale?: Locale): Promise<Tag[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
+		const visible = import.meta.env.PROD ? data.draft !== true : true;
+		return visible && (!locale || normalizeLocale(data.lang) === locale);
 	});
 
 	const countMap: { [key: string]: number } = {};
@@ -133,9 +212,10 @@ export type Category = {
 	url: string;
 };
 
-export async function getCategoryList(): Promise<Category[]> {
+export async function getCategoryList(locale?: Locale): Promise<Category[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
+		const visible = import.meta.env.PROD ? data.draft !== true : true;
+		return visible && (!locale || normalizeLocale(data.lang) === locale);
 	});
 	const count: { [key: string]: number } = {};
 	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
@@ -162,7 +242,7 @@ export async function getCategoryList(): Promise<Category[]> {
 		ret.push({
 			name: c,
 			count: count[c],
-			url: getCategoryUrl(c),
+			url: getCategoryUrl(c, locale),
 		});
 	}
 	return ret;

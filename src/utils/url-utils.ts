@@ -1,5 +1,6 @@
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import type { Locale } from "@i18n/config";
 
 export function pathsEqual(path1: string, path2: string) {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
@@ -12,23 +13,34 @@ function joinUrl(...parts: string[]): string {
 	return joined.replace(/\/+/g, "/");
 }
 
-export function getPostUrlBySlug(slug: string): string {
-	return url(`/posts/${slug}/`);
+export function getLocaleUrl(locale: Locale, path = "/"): string {
+	return url(`/${locale}/${path.replace(/^\/+/, "")}`);
 }
 
-export function getTagUrl(tag: string): string {
-	if (!tag) return url("/archive/");
-	return url(`/archive/?tag=${encodeURIComponent(tag.trim())}`);
+export function getPostUrlBySlug(slug: string, locale?: Locale): string {
+	return locale
+		? getLocaleUrl(locale, `/posts/${slug}/`)
+		: url(`/posts/${slug}/`);
 }
 
-export function getCategoryUrl(category: string | null): string {
+export function getTagUrl(tag: string, locale?: Locale): string {
+	const archive = locale ? getLocaleUrl(locale, "/archive/") : url("/archive/");
+	if (!tag) return archive;
+	return `${archive}?tag=${encodeURIComponent(tag.trim())}`;
+}
+
+export function getCategoryUrl(
+	category: string | null,
+	locale?: Locale,
+): string {
+	const archive = locale ? getLocaleUrl(locale, "/archive/") : url("/archive/");
 	if (
 		!category ||
 		category.trim() === "" ||
 		category.trim().toLowerCase() === i18n(I18nKey.uncategorized).toLowerCase()
 	)
-		return url("/archive/?uncategorized=true");
-	return url(`/archive/?category=${encodeURIComponent(category.trim())}`);
+		return `${archive}?uncategorized=true`;
+	return `${archive}?category=${encodeURIComponent(category.trim())}`;
 }
 
 export function getDir(path: string): string {

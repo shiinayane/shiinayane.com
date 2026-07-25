@@ -1,0 +1,55 @@
+---
+import ArchivePanel from "@components/ArchivePanel.svelte";
+import {
+	localeLanguageTag,
+	type Locale,
+	SUPPORTED_LOCALES,
+} from "@i18n/config";
+import I18nKey from "@i18n/i18nKey";
+import { translate } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getLocalizedPostsList } from "@utils/content-utils";
+import { getLocaleUrl, url } from "@utils/url-utils";
+
+export async function getStaticPaths() {
+	return Promise.all(
+		SUPPORTED_LOCALES.map(async (locale) => ({
+			params: { locale },
+			props: {
+				locale,
+				posts: await getLocalizedPostsList(locale),
+			},
+		})),
+	);
+}
+
+const { locale, posts } = Astro.props as {
+	locale: Locale;
+	posts: Awaited<ReturnType<typeof getLocalizedPostsList>>;
+};
+const canonicalUrl = new URL(getLocaleUrl(locale, "/archive/"), Astro.site);
+---
+
+<MainGridLayout
+	title={translate(locale, I18nKey.archive)}
+	lang={localeLanguageTag(locale)}
+>
+	<link slot="head" rel="canonical" href={canonicalUrl} />
+	{SUPPORTED_LOCALES.map((candidate) => (
+		<link
+			slot="head"
+			rel="alternate"
+			hreflang={localeLanguageTag(candidate)}
+			href={new URL(getLocaleUrl(candidate, "/archive/"), Astro.site)}
+		/>
+	))}
+	<link
+		slot="head"
+		rel="alternate"
+		hreflang="x-default"
+		href={new URL(url("/archive/"), Astro.site)}
+	/>
+	<div data-pagefind-filter={`locale:${locale}`}>
+		<ArchivePanel sortedPosts={posts} locale={locale} client:only="svelte" />
+	</div>
+</MainGridLayout>

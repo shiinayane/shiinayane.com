@@ -100,7 +100,9 @@ export default defineConfig({
 			}
 		}),
         svelte(),
-		sitemap(),
+		sitemap({
+			filter: (page) => !new URL(page).pathname.startsWith("/posts/"),
+		}),
 	],
 	markdown: {
 		remarkPlugins: [

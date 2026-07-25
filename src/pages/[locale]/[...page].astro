@@ -1,0 +1,66 @@
+---
+import type { GetStaticPaths, Page } from "astro";
+import Pagination from "../../components/control/Pagination.astro";
+import PostPage from "../../components/PostPage.astro";
+import { PAGE_SIZE } from "../../constants/constants";
+import {
+	isLocale,
+	localeLanguageTag,
+	SUPPORTED_LOCALES,
+	type Locale,
+} from "../../i18n/config";
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import { getLocalizedPosts } from "../../utils/content-utils";
+import { getLocaleUrl, url } from "../../utils/url-utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const paths = [];
+	for (const locale of SUPPORTED_LOCALES) {
+		const posts = await getLocalizedPosts(locale);
+		paths.push(
+			...paginate(posts, {
+				pageSize: PAGE_SIZE,
+				params: { locale },
+				props: { locale },
+			}),
+		);
+	}
+	return paths;
+}) satisfies GetStaticPaths;
+
+const { page, locale } = Astro.props as {
+	page: Page<Awaited<ReturnType<typeof getLocalizedPosts>>[number]>;
+	locale: Locale;
+};
+
+if (!isLocale(locale)) throw new Error(`Unsupported locale: ${locale}`);
+const len = page.data.length;
+const pageSuffix = page.currentPage === 1 ? "/" : `/${page.currentPage}/`;
+const canonicalUrl = new URL(getLocaleUrl(locale, pageSuffix), Astro.site);
+---
+
+<MainGridLayout lang={localeLanguageTag(locale)}>
+	<link slot="head" rel="canonical" href={canonicalUrl} />
+	{(page.currentPage === 1 ? SUPPORTED_LOCALES : [locale]).map((candidate) => (
+		<link
+			slot="head"
+			rel="alternate"
+			hreflang={localeLanguageTag(candidate)}
+			href={new URL(getLocaleUrl(candidate, pageSuffix), Astro.site)}
+		/>
+	))}
+	<link
+		slot="head"
+		rel="alternate"
+		hreflang="x-default"
+		href={new URL(page.currentPage === 1 ? url("/") : url(pageSuffix), Astro.site)}
+	/>
+	<div data-pagefind-body data-pagefind-filter={`locale:${locale}`}>
+		<PostPage page={page} locale={locale} />
+		<Pagination
+			class="mx-auto onload-animation"
+			page={page}
+			style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`}
+		/>
+	</div>
+</MainGridLayout>

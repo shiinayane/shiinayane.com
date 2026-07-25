@@ -2,13 +2,15 @@
 import { onMount } from "svelte";
 
 import I18nKey from "../i18n/i18nKey";
-import { i18n } from "../i18n/translation";
+import { translate } from "../i18n/translation";
+import type { Locale } from "../i18n/config";
 import type { PostForList } from "../utils/content-utils";
 import { getPostUrlBySlug } from "../utils/url-utils";
 
 export let tags: string[] = [];
 export let categories: string[] = [];
 export let sortedPosts: PostForList[] = [];
+export let locale: Locale = "en";
 
 const params = new URLSearchParams(window.location.search);
 tags = params.has("tag") ? params.getAll("tag") : [];
@@ -90,13 +92,13 @@ onMount(async () => {
                     ></div>
                 </div>
                 <div class="w-[70%] md:w-[80%] transition text-left text-50">
-                    {group.posts.length} {i18n(group.posts.length === 1 ? I18nKey.postCount : I18nKey.postsCount)}
+                    {group.posts.length} {translate(locale, group.posts.length === 1 ? I18nKey.postCount : I18nKey.postsCount)}
                 </div>
             </div>
 
             {#each group.posts as post}
                 <a
-                        href={getPostUrlBySlug(post.slug)}
+                        href={getPostUrlBySlug(post.slug, locale)}
                         aria-label={post.data.title}
                         class="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
                 >

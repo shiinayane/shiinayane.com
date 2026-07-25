@@ -1,0 +1,220 @@
+---
+import path from "node:path";
+import LanguageSwitcher from "@components/LanguageSwitcher.astro";
+import License from "@components/misc/License.astro";
+import Markdown from "@components/misc/Markdown.astro";
+import PostMetadata from "@components/PostMeta.astro";
+import {
+	localeLanguageTag,
+	type Locale,
+	SUPPORTED_LOCALES,
+} from "@i18n/config";
+import I18nKey from "@i18n/i18nKey";
+import { translate } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import {
+	getLocalizedPosts,
+	getPostLocale,
+	getPostTranslationKey,
+	getPostTranslations,
+	type PostEntry,
+} from "@utils/content-utils";
+import { formatDateToYYYYMMDD } from "@utils/date-utils";
+import { getDir, getPostUrlBySlug } from "@utils/url-utils";
+import { Icon } from "astro-icon/components";
+import { licenseConfig, profileConfig } from "../../../config";
+import ImageWrapper from "../../../components/misc/ImageWrapper.astro";
+
+export async function getStaticPaths() {
+	const paths = [];
+	for (const locale of SUPPORTED_LOCALES) {
+		for (const entry of await getLocalizedPosts(locale)) {
+			const translationKey = getPostTranslationKey(entry);
+			paths.push({
+				params: { locale, slug: translationKey },
+				props: {
+					entry,
+					locale,
+					translationKey,
+					translations: await getPostTranslations(translationKey),
+				},
+			});
+		}
+	}
+	return paths;
+}
+
+interface Props {
+	entry: PostEntry;
+	locale: Locale;
+	translationKey: string;
+	translations: Partial<Record<Locale, PostEntry>>;
+}
+
+const { entry, locale, translationKey, translations } = Astro.props as Props;
+if (getPostLocale(entry) !== locale) {
+	throw new Error(`Post locale mismatch for ${translationKey}`);
+}
+
+const rendered = await entry.render();
+const { Content, headings, remarkPluginFrontmatter } = rendered;
+const languageTag = localeLanguageTag(locale);
+const canonicalPath = getPostUrlBySlug(translationKey, locale);
+const canonicalUrl = new URL(canonicalPath, Astro.site);
+const neutralUrl = new URL(`/posts/${translationKey}/`, Astro.site);
+const translationUrls: Partial<Record<Locale, string>> = {};
+for (const candidate of SUPPORTED_LOCALES) {
+	if (translations[candidate]) {
+		translationUrls[candidate] = getPostUrlBySlug(translationKey, candidate);
+	}
+}
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	headline: entry.data.title,
+	description: entry.data.description || entry.data.title,
+	keywords: entry.data.tags,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+		url: Astro.site,
+	},
+	datePublished: formatDateToYYYYMMDD(entry.data.published),
+	inLanguage: languageTag,
+	url: canonicalUrl.toString(),
+};
+---
+
+<MainGridLayout
+	banner={entry.data.image}
+	title={entry.data.title}
+	description={entry.data.description}
+	lang={languageTag}
+	setOGTypeArticle={true}
+	headings={headings}
+>
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+	<link slot="head" rel="canonical" href={canonicalUrl} />
+	{SUPPORTED_LOCALES.map((candidate) =>
+		translations[candidate] ? (
+			<link
+				slot="head"
+				rel="alternate"
+				hreflang={localeLanguageTag(candidate)}
+				href={new URL(getPostUrlBySlug(translationKey, candidate), Astro.site)}
+			/>
+		) : null
+	)}
+	<link slot="head" rel="alternate" hreflang="x-default" href={neutralUrl} />
+
+	<article data-pagefind-body data-pagefind-filter={`locale:${locale}`}>
+		<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+			<div id="post-container" class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full">
+				<div class="flex flex-wrap items-center justify-between gap-3 mb-3 transition onload-animation">
+					<div class="flex flex-row text-black/30 dark:text-white/30 gap-5">
+						<div class="flex flex-row items-center">
+							<div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+								<Icon name="material-symbols:notes-rounded" />
+							</div>
+							<div class="text-sm">
+								{remarkPluginFrontmatter.words}{" "}
+								{translate(locale, I18nKey.wordsCount)}
+							</div>
+						</div>
+						<div class="flex flex-row items-center">
+							<div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+								<Icon name="material-symbols:schedule-outline-rounded" />
+							</div>
+							<div class="text-sm">
+								{remarkPluginFrontmatter.minutes}{" "}
+								{translate(
+									locale,
+									remarkPluginFrontmatter.minutes === 1
+										? I18nKey.minuteCount
+										: I18nKey.minutesCount,
+								)}
+							</div>
+						</div>
+					</div>
+					<LanguageSwitcher current={locale} urls={translationUrls} />
+				</div>
+
+				<div class="relative onload-animation">
+					<h1
+						data-pagefind-weight="10"
+						data-pagefind-meta="title"
+						class="transition w-full block font-bold mb-3 text-3xl md:text-[2.25rem]/[2.75rem] text-black/90 dark:text-white/90 md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)] before:absolute before:top-[0.75rem] before:left-[-1.125rem]"
+					>
+						{entry.data.title}
+					</h1>
+				</div>
+
+				<div class="onload-animation">
+					<PostMetadata
+						class="mb-5"
+						published={entry.data.published}
+						updated={entry.data.updated}
+						tags={entry.data.tags}
+						category={entry.data.category}
+						locale={locale}
+					/>
+					{!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
+				</div>
+
+				{entry.data.image && (
+					<ImageWrapper
+						id="post-cover"
+						src={entry.data.image}
+						basePath={path.join("content/posts/", getDir(entry.id))}
+						class="mb-8 rounded-xl banner-container onload-animation"
+					/>
+				)}
+
+				<Markdown class="mb-6 markdown-content onload-animation">
+					<Content />
+				</Markdown>
+
+				{licenseConfig.enable && (
+					<License
+						title={entry.data.title}
+						slug={translationKey}
+						pubDate={entry.data.published}
+						locale={locale}
+						class="mb-6 rounded-xl license-container"
+					/>
+				)}
+			</div>
+		</div>
+
+		<div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
+			<a
+				href={entry.data.nextSlug ? getPostUrlBySlug(entry.data.nextSlug, locale) : "#"}
+				class:list={["w-full font-bold overflow-hidden active:scale-95", { "pointer-events-none": !entry.data.nextSlug }]}
+			>
+				{entry.data.nextSlug && (
+					<div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-start gap-4">
+						<Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)]" />
+						<div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
+							{entry.data.nextTitle}
+						</div>
+					</div>
+				)}
+			</a>
+
+			<a
+				href={entry.data.prevSlug ? getPostUrlBySlug(entry.data.prevSlug, locale) : "#"}
+				class:list={["w-full font-bold overflow-hidden active:scale-95", { "pointer-events-none": !entry.data.prevSlug }]}
+			>
+				{entry.data.prevSlug && (
+					<div class="btn-card rounded-2xl w-full h-[3.75rem] max-w-full px-4 flex items-center !justify-end gap-4">
+						<div class="overflow-hidden transition overflow-ellipsis whitespace-nowrap max-w-[calc(100%_-_3rem)] text-black/75 dark:text-white/75">
+							{entry.data.prevTitle}
+						</div>
+						<Icon name="material-symbols:chevron-right-rounded" class="text-[2rem] text-[var(--primary)]" />
+					</div>
+				)}
+			</a>
+		</div>
+	</article>
+</MainGridLayout>

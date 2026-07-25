@@ -1,0 +1,51 @@
+---
+import {
+	LOCALE_LABELS,
+	localeLanguageTag,
+	type Locale,
+	SUPPORTED_LOCALES,
+} from "@i18n/config";
+
+interface Props {
+	current: Locale;
+	urls: Partial<Record<Locale, string>>;
+}
+
+const { current, urls } = Astro.props;
+const available = SUPPORTED_LOCALES.filter((locale) => urls[locale]);
+---
+
+{available.length > 1 && (
+	<nav class="language-switcher flex items-center gap-1" aria-label="Language">
+		{available.map((locale) => (
+			<a
+				href={urls[locale]}
+				data-locale={locale}
+				data-no-swup
+				hreflang={localeLanguageTag(locale)}
+				lang={localeLanguageTag(locale)}
+				aria-current={locale === current ? "page" : undefined}
+				class:list={[
+					"rounded-md px-2 py-1 text-xs transition",
+					locale === current
+						? "bg-[var(--primary)]/15 text-[var(--primary)] font-medium pointer-events-none"
+						: "text-black/40 dark:text-white/40 hover:text-[var(--primary)] hover:bg-[var(--btn-plain-bg-hover)]",
+				]}
+			>
+				{LOCALE_LABELS[locale]}
+			</a>
+		))}
+	</nav>
+)}
+
+<script>
+	for (const link of document.querySelectorAll<HTMLAnchorElement>(
+		".language-switcher a[data-locale]",
+	)) {
+		link.addEventListener("click", () => {
+			const locale = link.dataset.locale;
+			if (!locale) return;
+			document.cookie = `locale=${encodeURIComponent(locale)}; Path=/; Max-Age=31536000; SameSite=Lax`;
+		});
+	}
+</script>

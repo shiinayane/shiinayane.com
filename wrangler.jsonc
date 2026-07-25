@@ -1,8 +1,15 @@
 {
 	"name": "shiinayane-com",
 	"compatibility_date": "2026-05-03", // Update to the day you deploy
+	"main": "src/worker.ts",
 	"assets": {
-		"directory": "./dist"
+		"directory": "./dist",
+		"binding": "ASSETS",
+		"run_worker_first": [
+			"/",
+			"/posts/*",
+			"/set-language"
+		]
 	},
 	"observability": {
 		"enabled": false,

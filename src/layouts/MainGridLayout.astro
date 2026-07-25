@@ -14,6 +14,7 @@ import {
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
 } from "../constants/constants";
 import Layout from "./Layout.astro";
+import { normalizeLocale } from "../i18n/config";
 
 interface Props {
 	title?: string;
@@ -32,6 +33,7 @@ const {
 	setOGTypeArticle,
 	headings = [],
 } = Astro.props;
+const locale = normalizeLocale(lang);
 const hasBannerCredit =
 	siteConfig.banner.enable && siteConfig.banner.credit.enable;
 const hasBannerLink = !!siteConfig.banner.credit.url;
@@ -47,7 +49,7 @@ const mainPanelTop = siteConfig.banner.enable
 <slot slot="head" name="head"></slot>
 <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto" class:list={[""]}>
     <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
-        <Navbar></Navbar>
+        <Navbar locale={locale}></Navbar>
     </div>
 </div>
 
@@ -80,7 +82,7 @@ const mainPanelTop = siteConfig.banner.enable
             </a>}
 
 
-            <SideBar class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" headings={headings}></SideBar>
+            <SideBar class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" headings={headings} locale={locale}></SideBar>
 
             <main id="swup-container" class="transition-swup-fade col-span-2 lg:col-span-1 overflow-hidden">
                 <div id="content-wrapper" class="onload-animation">
@@ -88,13 +90,13 @@ const mainPanelTop = siteConfig.banner.enable
                     <!-- make id different from windows.swup global property -->
                     <slot></slot>
                     <div class="footer col-span-2 onload-animation hidden lg:block">
-                        <Footer></Footer>
+                        <Footer locale={locale}></Footer>
                     </div>
                 </div>
             </main>
 
             <div class="footer col-span-2 onload-animation block lg:hidden">
-                <Footer></Footer>
+                <Footer locale={locale}></Footer>
             </div>
         </div>
 
