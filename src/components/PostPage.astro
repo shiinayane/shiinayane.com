@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { DEFAULT_LOCALE, type Locale } from "@i18n/config";
-import { getPostTranslationKey } from "@utils/content-utils";
+import { getPostLocale, getPostTranslationKey } from "@utils/content-utils";
 import { getPostUrlBySlug } from "@utils/url-utils";
 import type { Page } from "astro";
 import PostCard from "./PostCard.astro";
@@ -23,7 +23,7 @@ const interval = 50;
                 category={entry.data.category}
                 published={entry.data.published}
                 updated={entry.data.updated}
-                url={getPostUrlBySlug(getPostTranslationKey(entry), locale)}
+                url={getPostUrlBySlug(getPostTranslationKey(entry), getPostLocale(entry))}
                 image={entry.data.image}
                 description={entry.data.description}
                 draft={entry.data.draft}

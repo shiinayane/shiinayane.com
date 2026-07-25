@@ -1,6 +1,5 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
-import LanguageSwitcher from "@components/LanguageSwitcher.astro";
 import Markdown from "@components/misc/Markdown.astro";
 import { type Locale, localeLanguageTag, normalizeLocale } from "@i18n/config";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
@@ -35,6 +34,7 @@ const canonicalUrl = new URL(getLocaleUrl(locale, "/contact/"), Astro.site);
 	title={entry.data.title}
 	description={entry.data.description}
 	lang={localeLanguageTag(locale)}
+	localeUrls={localizedUrls}
 >
 	<link slot="head" rel="canonical" href={canonicalUrl} />
 	{entries.map((candidate) => {
@@ -60,9 +60,6 @@ const canonicalUrl = new URL(getLocaleUrl(locale, "/contact/"), Astro.site);
 		data-pagefind-filter={`locale:${locale}`}
 	>
 		<div class="card-base z-10 px-9 py-6 relative w-full">
-			<div class="flex justify-end mb-3">
-				<LanguageSwitcher current={locale} urls={localizedUrls} />
-			</div>
 			<Markdown class="mt-2">
 				<Content />
 			</Markdown>

@@ -88,6 +88,29 @@ export async function getLocalizedPosts(locale: Locale): Promise<PostEntry[]> {
 	return connectAdjacentPosts(sortPosts(localized));
 }
 
+// Build a language-inclusive home feed while showing only one version of each
+// translation group. Prefer the current UI language when it exists, otherwise
+// fall back deterministically without changing the chronological order.
+export async function getHomepagePosts(locale: Locale): Promise<PostEntry[]> {
+	const groups = new Map<string, Partial<Record<Locale, PostEntry>>>();
+	for (const post of await getVisiblePosts()) {
+		const key = getPostTranslationKey(post);
+		const group = groups.get(key) ?? {};
+		group[getPostLocale(post)] = post;
+		groups.set(key, group);
+	}
+
+	const selected = Array.from(groups.values()).flatMap((group) => {
+		const preferred =
+			group[locale] ??
+			group[DEFAULT_LOCALE] ??
+			SUPPORTED_LOCALES.map((candidate) => group[candidate]).find(Boolean);
+		return preferred ? [preferred] : [];
+	});
+
+	return sortPosts(selected);
+}
+
 export async function getPostTranslations(
 	translationKey: string,
 ): Promise<Partial<Record<Locale, PostEntry>>> {

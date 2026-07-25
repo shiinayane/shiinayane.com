@@ -10,13 +10,13 @@ import {
 	SUPPORTED_LOCALES,
 } from "../../i18n/config";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
-import { getLocalizedPosts } from "../../utils/content-utils";
+import { getHomepagePosts } from "../../utils/content-utils";
 import { getLocaleUrl, url } from "../../utils/url-utils";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const paths = [];
 	for (const locale of SUPPORTED_LOCALES) {
-		const posts = await getLocalizedPosts(locale);
+		const posts = await getHomepagePosts(locale);
 		paths.push(
 			...paginate(posts, {
 				pageSize: PAGE_SIZE,
@@ -29,7 +29,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 }) satisfies GetStaticPaths;
 
 const { page, locale } = Astro.props as {
-	page: Page<Awaited<ReturnType<typeof getLocalizedPosts>>[number]>;
+	page: Page<Awaited<ReturnType<typeof getHomepagePosts>>[number]>;
 	locale: Locale;
 };
 

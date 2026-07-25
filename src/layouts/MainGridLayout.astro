@@ -13,7 +13,7 @@ import {
 	BANNER_HEIGHT_EXTEND,
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
 } from "../constants/constants";
-import { normalizeLocale } from "../i18n/config";
+import { type Locale, normalizeLocale } from "../i18n/config";
 import Layout from "./Layout.astro";
 
 interface Props {
@@ -23,6 +23,7 @@ interface Props {
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
+	localeUrls?: Partial<Record<Locale, string>>;
 }
 
 const {
@@ -32,6 +33,7 @@ const {
 	lang,
 	setOGTypeArticle,
 	headings = [],
+	localeUrls,
 } = Astro.props;
 const locale = normalizeLocale(lang);
 const hasBannerCredit =
@@ -49,7 +51,7 @@ const mainPanelTop = siteConfig.banner.enable
 <slot slot="head" name="head"></slot>
 <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto" class:list={[""]}>
     <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
-        <Navbar locale={locale}></Navbar>
+        <Navbar locale={locale} localeUrls={localeUrls}></Navbar>
     </div>
 </div>
 

@@ -1,10 +1,10 @@
 ---
 import path from "node:path";
-import LanguageSwitcher from "@components/LanguageSwitcher.astro";
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
 import PostMetadata from "@components/PostMeta.astro";
 import {
+	LOCALE_LABELS,
 	type Locale,
 	localeLanguageTag,
 	SUPPORTED_LOCALES,
@@ -93,6 +93,7 @@ const jsonLd = {
 	lang={languageTag}
 	setOGTypeArticle={true}
 	headings={headings}
+	localeUrls={translationUrls}
 >
 	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
 	<link slot="head" rel="canonical" href={canonicalUrl} />
@@ -111,7 +112,7 @@ const jsonLd = {
 	<article data-pagefind-body data-pagefind-filter={`locale:${locale}`}>
 		<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
 			<div id="post-container" class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full">
-				<div class="flex flex-wrap items-center justify-between gap-3 mb-3 transition onload-animation">
+				<div class="flex flex-wrap items-center gap-3 mb-3 transition onload-animation">
 					<div class="flex flex-row text-black/30 dark:text-white/30 gap-5">
 						<div class="flex flex-row items-center">
 							<div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
@@ -136,8 +137,13 @@ const jsonLd = {
 								)}
 							</div>
 						</div>
+						<div class="flex flex-row items-center">
+							<div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+								<Icon name="material-symbols:translate-rounded" />
+							</div>
+							<div class="text-sm">{LOCALE_LABELS[locale]}</div>
+						</div>
 					</div>
-					<LanguageSwitcher current={locale} urls={translationUrls} />
 				</div>
 
 				<div class="relative onload-animation">

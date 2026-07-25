@@ -2,9 +2,10 @@
 import type { CollectionEntry } from "astro:content";
 import path from "node:path";
 import { Icon } from "astro-icon/components";
-import { DEFAULT_LOCALE, type Locale } from "../i18n/config";
+import { DEFAULT_LOCALE, LOCALE_LABELS, type Locale } from "../i18n/config";
 import I18nKey from "../i18n/i18nKey";
 import { translate } from "../i18n/translation";
+import { getPostLocale } from "../utils/content-utils";
 import { getDir } from "../utils/url-utils";
 import ImageWrapper from "./misc/ImageWrapper.astro";
 import PostMetadata from "./PostMeta.astro";
@@ -38,6 +39,7 @@ const {
 	locale = DEFAULT_LOCALE,
 } = Astro.props;
 const className = Astro.props.class;
+const contentLocale = getPostLocale(entry);
 
 const hasCover = image !== undefined && image !== null && image !== "";
 
@@ -76,6 +78,8 @@ const { remarkPluginFrontmatter } = await entry.render();
             <div>
                 {remarkPluginFrontmatter.minutes} {" " + translate(locale, remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
             </div>
+            <div>|</div>
+            <div>{LOCALE_LABELS[contentLocale]}</div>
         </div>
 
     </div>

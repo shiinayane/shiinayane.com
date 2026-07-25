@@ -5,6 +5,7 @@ import {
 	localeLanguageTag,
 	SUPPORTED_LOCALES,
 } from "@i18n/config";
+import { Icon } from "astro-icon/components";
 
 interface Props {
 	current: Locale;
@@ -16,26 +17,51 @@ const available = SUPPORTED_LOCALES.filter((locale) => urls[locale]);
 ---
 
 {available.length > 1 && (
-	<nav class="language-switcher flex items-center gap-1" aria-label="Language">
-		{available.map((locale) => (
-			<a
-				href={urls[locale]}
-				data-locale={locale}
-				data-no-swup
-				hreflang={localeLanguageTag(locale)}
-				lang={localeLanguageTag(locale)}
-				aria-current={locale === current ? "page" : undefined}
-				class:list={[
-					"rounded-md px-2 py-1 text-xs transition",
-					locale === current
-						? "bg-[var(--primary)]/15 text-[var(--primary)] font-medium pointer-events-none"
-						: "text-black/40 dark:text-white/40 hover:text-[var(--primary)] hover:bg-[var(--btn-plain-bg-hover)]",
-				]}
+	<div class="language-switcher group/language relative z-50">
+		<button
+			type="button"
+			aria-label="Language"
+			aria-haspopup="menu"
+			class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90"
+		>
+			<Icon
+				name="material-symbols:translate-rounded"
+				class="text-[1.25rem]"
+			/>
+		</button>
+		<div
+			class="block invisible opacity-0 translate-y-1 group-hover/language:visible group-hover/language:opacity-100 group-hover/language:translate-y-0 group-focus-within/language:visible group-focus-within/language:opacity-100 group-focus-within/language:translate-y-0 absolute transition top-11 -right-2 pt-5"
+		>
+			<nav
+				class="card-base float-panel p-2 min-w-36"
+				aria-label="Language"
+				role="menu"
 			>
-				{LOCALE_LABELS[locale]}
-			</a>
-		))}
-	</nav>
+				{available.map((locale) => (
+					<a
+						href={urls[locale]}
+						data-locale={locale}
+						data-no-swup
+						hreflang={localeLanguageTag(locale)}
+						lang={localeLanguageTag(locale)}
+						aria-current={locale === current ? "page" : undefined}
+						role="menuitem"
+						class:list={[
+							"flex transition whitespace-nowrap items-center !justify-start w-full btn-plain scale-animation rounded-lg h-9 px-3 font-medium active:scale-95",
+							locale === current
+								? "current-theme-btn pointer-events-none"
+								: "",
+						]}
+					>
+						<span class="w-5 mr-2 text-xs font-bold uppercase">
+							{locale}
+						</span>
+						{LOCALE_LABELS[locale]}
+					</a>
+				))}
+			</nav>
+		</div>
+	</div>
 )}
 
 <script>
