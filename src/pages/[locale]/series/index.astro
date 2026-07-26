@@ -1,6 +1,7 @@
 ---
 import { getSeriesMeta } from "@constants/series";
 import {
+	DEFAULT_LOCALE,
 	type Locale,
 	localeLanguageTag,
 	SUPPORTED_LOCALES,
@@ -14,13 +15,37 @@ import { getLocaleUrl, url } from "@utils/url-utils";
 export async function getStaticPaths() {
 	return Promise.all(
 		SUPPORTED_LOCALES.map(async (locale) => {
-			const slugs = await getSeriesList(locale);
+			const slugs = await getSeriesList();
 			const series = await Promise.all(
-				slugs.map(async (slug) => ({
-					slug,
-					meta: getSeriesMeta(slug, locale),
-					count: (await getSeriesPosts(slug, locale)).length,
-				})),
+				slugs.map(async (slug) => {
+					const postsByLocale = await Promise.all(
+						SUPPORTED_LOCALES.map(async (candidate) => ({
+							locale: candidate,
+							posts: await getSeriesPosts(slug, candidate),
+						})),
+					);
+					const preferredLocales = [
+						locale,
+						DEFAULT_LOCALE,
+						...SUPPORTED_LOCALES,
+					];
+					const content =
+						preferredLocales
+							.map((candidate) =>
+								postsByLocale.find(
+									(entry) =>
+										entry.locale === candidate && entry.posts.length > 0,
+								),
+							)
+							.find(Boolean) ?? postsByLocale[0];
+
+					return {
+						slug,
+						meta: getSeriesMeta(slug, locale),
+						count: content.posts.length,
+						contentLocale: content.locale,
+					};
+				}),
 			);
 			series.sort(
 				(a, b) => b.count - a.count || a.meta.name.localeCompare(b.meta.name),
@@ -36,6 +61,7 @@ const { locale, series } = Astro.props as {
 		slug: string;
 		meta: ReturnType<typeof getSeriesMeta>;
 		count: number;
+		contentLocale: Locale;
 	}>;
 };
 const title = translate(locale, I18nKey.series);
@@ -78,7 +104,10 @@ const canonicalUrl = new URL(getLocaleUrl(locale, "/series/"), Astro.site);
 				{series.map((item) => (
 					<li class="transition rounded-[var(--radius-large)] bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[var(--btn-plain-bg-hover)]">
 						<a
-							href={getLocaleUrl(locale, `/series/${item.slug}/`)}
+							href={getLocaleUrl(
+								item.contentLocale,
+								`/series/${item.slug}/`,
+							)}
 							class="block px-5 py-4"
 						>
 							<span class="flex items-baseline gap-3 flex-wrap">
