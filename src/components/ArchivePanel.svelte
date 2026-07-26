@@ -97,7 +97,7 @@ onMount(async () => {
 
             {#each group.posts as post}
                 <a
-                        href={getPostUrlBySlug(post.slug, locale)}
+                        href={getPostUrlBySlug(post.slug, post.locale)}
                         aria-label={post.data.title}
                         class="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
                 >

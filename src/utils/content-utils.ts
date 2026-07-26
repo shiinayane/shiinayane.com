@@ -88,10 +88,10 @@ export async function getLocalizedPosts(locale: Locale): Promise<PostEntry[]> {
 	return connectAdjacentPosts(sortPosts(localized));
 }
 
-// Build a language-inclusive home feed while showing only one version of each
+// Build a language-inclusive view while showing only one version of each
 // translation group. Prefer the current UI language when it exists, otherwise
 // fall back deterministically without changing the chronological order.
-export async function getHomepagePosts(locale: Locale): Promise<PostEntry[]> {
+export async function getPreferredPosts(locale: Locale): Promise<PostEntry[]> {
 	const groups = new Map<string, Partial<Record<Locale, PostEntry>>>();
 	for (const post of await getVisiblePosts()) {
 		const key = getPostTranslationKey(post);
@@ -109,6 +109,10 @@ export async function getHomepagePosts(locale: Locale): Promise<PostEntry[]> {
 	});
 
 	return sortPosts(selected);
+}
+
+export async function getHomepagePosts(locale: Locale): Promise<PostEntry[]> {
+	return getPreferredPosts(locale);
 }
 
 export async function getPostTranslations(
@@ -141,6 +145,7 @@ export async function getTranslationManifest(): Promise<
 }
 export type PostForList = {
 	slug: string;
+	locale: Locale;
 	data: CollectionEntry<"posts">["data"];
 };
 export async function getSortedPostsList(): Promise<PostForList[]> {
@@ -148,18 +153,20 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 
 	// delete post.body
 	const sortedPostsList = sortedFullPosts.map((post) => ({
-		slug: post.slug,
+		slug: getPostTranslationKey(post),
+		locale: getPostLocale(post),
 		data: post.data,
 	}));
 
 	return sortedPostsList;
 }
 
-export async function getLocalizedPostsList(
+export async function getPreferredPostsList(
 	locale: Locale,
 ): Promise<PostForList[]> {
-	return (await getLocalizedPosts(locale)).map((post) => ({
+	return (await getPreferredPosts(locale)).map((post) => ({
 		slug: getPostTranslationKey(post),
+		locale: getPostLocale(post),
 		data: post.data,
 	}));
 }
@@ -169,13 +176,12 @@ export type Tag = {
 };
 
 export async function getTagList(locale?: Locale): Promise<Tag[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		const visible = import.meta.env.PROD ? data.draft !== true : true;
-		return visible && (!locale || normalizeLocale(data.lang) === locale);
-	});
+	const allBlogPosts = locale
+		? await getPreferredPosts(locale)
+		: await getRawSortedPosts();
 
 	const countMap: { [key: string]: number } = {};
-	allBlogPosts.forEach((post: { data: { tags: string[] } }) => {
+	allBlogPosts.forEach((post) => {
 		post.data.tags.forEach((tag: string) => {
 			if (!countMap[tag]) countMap[tag] = 0;
 			countMap[tag]++;
@@ -246,12 +252,11 @@ export type Category = {
 };
 
 export async function getCategoryList(locale?: Locale): Promise<Category[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		const visible = import.meta.env.PROD ? data.draft !== true : true;
-		return visible && (!locale || normalizeLocale(data.lang) === locale);
-	});
+	const allBlogPosts = locale
+		? await getPreferredPosts(locale)
+		: await getRawSortedPosts();
 	const count: { [key: string]: number } = {};
-	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
+	allBlogPosts.forEach((post) => {
 		if (!post.data.category) {
 			const ucKey = i18n(I18nKey.uncategorized);
 			count[ucKey] = count[ucKey] ? count[ucKey] + 1 : 1;
