@@ -62,13 +62,13 @@ translationKey: sovereignty
 
 下面所有判断都只针对 Layer 1，也就是运行时版本。
 
-- **Python：**没有主权工具。`pyenv`、`mise`、`uv`、系统 Python 等方案同时存在。因此我让 `mise` 管 Layer 1，`uv` 只管 Layer 2，具体配置见 [Python 那篇文章](/zh/posts/python/)。
-- **Rust：**`rustup` 就是主权工具。我的机器由它安装 Rust，不交给 `mise`。
-- **Node.js：**`nvm`、`fnm`、`volta`、`mise` 彼此竞争，没有一个官方答案。我用 `mise`。
-- **Java：**没有主权工具，而且 Java 还有多个发行版。我用 `mise`，默认选 Temurin；这是一个相对中性的选择，不必每个项目都重新争论发行版。
-- **Swift / iOS：**Xcode 由 Apple 发布，同时管理工具链、SDK 和构建系统。在 macOS 上绕过它安装 Swift 基本是在和平台较劲，所以我完全交给 Xcode。
-- **Go：**官方方案能力不足，不适合接管这一层。我和许多用户一样，把 Go 交给 `mise`。
-- **Ruby：**`rbenv`、`rvm`、`chruby`、`mise` 都有人用，没有主权工具。需要 Ruby 时，我用 `mise` 管版本。
+- **Python**：没有主权工具。`pyenv`、`mise`、`uv`、系统 Python 等方案同时存在。因此我让 `mise` 管 Layer 1，`uv` 只管 Layer 2，具体配置见 [Python 那篇文章](/zh/posts/python/)。
+- **Rust**：`rustup` 就是主权工具。我的机器由它安装 Rust，不交给 `mise`。
+- **Node.js**：`nvm`、`fnm`、`volta`、`mise` 彼此竞争，没有一个官方答案。我用 `mise`。
+- **Java**：没有主权工具，而且 Java 还有多个发行版。我用 `mise`，默认选 Temurin；这是一个相对中性的选择，不必每个项目都重新争论发行版。
+- **Swift / iOS**：Xcode 由 Apple 发布，同时管理工具链、SDK 和构建系统。在 macOS 上绕过它安装 Swift 基本是在和平台较劲，所以我完全交给 Xcode。
+- **Go**：官方方案能力不足，不适合接管这一层。我和许多用户一样，把 Go 交给 `mise`。
+- **Ruby**：`rbenv`、`rvm`、`chruby`、`mise` 都有人用，没有主权工具。需要 Ruby 时，我用 `mise` 管版本。
 
 ## `mise` 也可以只做一层代理
 
@@ -84,8 +84,8 @@ rust = "1.78"
 
 因此有两种都合理的配置：
 
-- **直接使用 `rustup`：**纯 Rust 项目没有需要统一的多语言环境，直接操作 `rustup` 最省事。
-- **让 `mise` 作为项目入口：**多语言项目已经在 `mise.toml` 里固定 Python 和 Node 时，可以再加上 `rust = "1.78"`。这样一条 `mise install` 就能按同一份声明准备整个项目，Rust 部分仍委托给 `rustup`。
+- **直接使用 `rustup`**：纯 Rust 项目没有需要统一的多语言环境，直接操作 `rustup` 最省事。
+- **让 `mise` 作为项目入口**：多语言项目已经在 `mise.toml` 里固定 Python 和 Node 时，可以再加上 `rust = "1.78"`。这样一条 `mise install` 就能按同一份声明准备整个项目，Rust 部分仍委托给 `rustup`。
 
 真正的坑，是在同一个项目里混用两套入口，最后两份文件都说不清哪个才算数。对外入口可以选 `mise` 或 `rustup`，但 Rust 工具链的所有权仍然只能归 `rustup`。
 
