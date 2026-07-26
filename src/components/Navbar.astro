@@ -2,7 +2,12 @@
 import { Icon } from "astro-icon/components";
 import { navBarConfig, siteConfig } from "../config";
 import { LinkPresets } from "../constants/link-presets";
-import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from "../i18n/config";
+import {
+	DEFAULT_LOCALE,
+	type Locale,
+	localeLanguageTag,
+	SUPPORTED_LOCALES,
+} from "../i18n/config";
 import I18nKey from "../i18n/i18nKey";
 import { translate } from "../i18n/translation";
 import { LinkPreset, type NavBarLink } from "../types/config";
@@ -58,6 +63,12 @@ const localeUrls = Object.fromEntries(
 	SUPPORTED_LOCALES.map((candidate) => [
 		candidate,
 		contextualLocaleUrls?.[candidate] ?? getLocaleUrl(candidate),
+	]),
+);
+const pagefindLanguages = Object.fromEntries(
+	SUPPORTED_LOCALES.map((candidate) => [
+		candidate,
+		localeLanguageTag(candidate).toLowerCase(),
 	]),
 );
 ---
@@ -146,7 +157,11 @@ function loadButtonScript() {
 loadButtonScript();
 </script>
 
-{import.meta.env.PROD && <script is:inline define:vars={{scriptUrl: url('/pagefind/pagefind.js')}}>
+{import.meta.env.PROD && <script is:inline define:vars={{
+	scriptUrl: url('/pagefind/pagefind.js'),
+	pagefindLanguages,
+	currentLocale: locale,
+}}>
 async function loadPagefind() {
     try {
         const response = await fetch(scriptUrl, { method: 'HEAD' });
@@ -154,13 +169,22 @@ async function loadPagefind() {
             throw new Error(`Pagefind script not found: ${response.status}`);
         }
 
-        const pagefind = await import(scriptUrl);
-
-        await pagefind.options({
-            excerptLength: 20
-        });
-
-        window.pagefind = pagefind;
+        const pagefindPromises = {};
+        window.getPagefind = (locale) => {
+            if (!pagefindPromises[locale]) {
+                const language = pagefindLanguages[locale] ?? pagefindLanguages.en;
+                pagefindPromises[locale] = import(`${scriptUrl}?language=${encodeURIComponent(language)}`)
+                    .then(async (pagefind) => {
+                        await pagefind.options({
+                            excerptLength: 20,
+                            language,
+                        });
+                        return pagefind;
+                    });
+            }
+            return pagefindPromises[locale];
+        };
+        window.pagefind = await window.getPagefind(currentLocale);
 
         document.dispatchEvent(new CustomEvent('pagefindready'));
         console.log('Pagefind loaded and initialized successfully, event dispatched.');
@@ -170,6 +194,7 @@ async function loadPagefind() {
             search: () => Promise.resolve({ results: [] }),
             options: () => Promise.resolve(),
         };
+        window.getPagefind = () => Promise.resolve(window.pagefind);
         document.dispatchEvent(new CustomEvent('pagefindloaderror'));
         console.log('Pagefind load error, event dispatched.');
     }

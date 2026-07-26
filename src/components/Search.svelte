@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Locale } from "@i18n/config";
+import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from "@i18n/config";
 import I18nKey from "@i18n/i18nKey";
 import { translate } from "@i18n/translation";
 import Icon from "@iconify/svelte";
@@ -66,12 +66,38 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 		let searchResults: SearchResult[] = [];
 
 		if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
-			const response = await window.pagefind.search(keyword, {
-				filters: { locale },
-			});
-			searchResults = await Promise.all(
-				response.results.map((item) => item.data()),
+			const localeOrder = [locale, DEFAULT_LOCALE, ...SUPPORTED_LOCALES].filter(
+				(candidate, index, locales) => locales.indexOf(candidate) === index,
 			);
+			const pagefindInstances = await Promise.all(
+				localeOrder.map((candidate) =>
+					window.getPagefind
+						? window.getPagefind(candidate)
+						: Promise.resolve(window.pagefind),
+				),
+			);
+			const responses = await Promise.all(
+				localeOrder.map((candidate, index) =>
+					pagefindInstances[index].search(keyword, {
+						filters: { locale: candidate },
+					}),
+				),
+			);
+			const localizedResults = await Promise.all(
+				responses.map((response) =>
+					Promise.all(response.results.map((item) => item.data())),
+				),
+			);
+			const preferredResults = new Map<string, SearchResult>();
+			for (const results of localizedResults) {
+				for (const item of results) {
+					const contentKey = item.url.replace(/^\/(?:en|zh|ja)(?=\/)/, "");
+					if (!preferredResults.has(contentKey)) {
+						preferredResults.set(contentKey, item);
+					}
+				}
+			}
+			searchResults = Array.from(preferredResults.values());
 		} else if (import.meta.env.DEV) {
 			searchResults = fakeResult;
 		} else {

@@ -1,16 +1,28 @@
 import type { AstroIntegration } from "@swup/astro";
 
+interface PagefindApi {
+	search: (
+		query: string,
+		options?: {
+			filters?: Record<string, string | string[]>;
+		},
+	) => Promise<{
+		results: Array<{
+			data: () => Promise<SearchResult>;
+		}>;
+	}>;
+	options?: (options: {
+		excerptLength?: number;
+		language?: string;
+	}) => Promise<void>;
+}
+
 declare global {
 	interface Window {
 		// type from '@swup/astro' is incorrect
 		swup: AstroIntegration;
-		pagefind: {
-			search: (query: string) => Promise<{
-				results: Array<{
-					data: () => Promise<SearchResult>;
-				}>;
-			}>;
-		};
+		pagefind: PagefindApi;
+		getPagefind?: (locale: "en" | "zh" | "ja") => Promise<PagefindApi>;
 	}
 }
 
