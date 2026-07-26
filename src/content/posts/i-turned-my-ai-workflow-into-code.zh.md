@@ -9,6 +9,8 @@ lang: zh_CN
 translationKey: i-turned-my-ai-workflow-into-code
 ---
 
+> **2026-07-27 更新：**这篇文章发布后的第二天，BiliKit M5.0 暴露了这套工作流最严重的问题：它能把已经选择的路线做得越来越严谨，却可能一直没有检查问题本身是否值得这样解决。我保留了原文，并另外写了一篇后续：[《我把 AI 工作流写成了代码，然后亲手拆掉了它》](/zh/posts/i-turned-my-ai-workflow-into-code-then-i-tore-it-apart/)
+
 BiliKit V1 还没做完，Swift 代码已经超过了 2.1 万行。
 
 项目小的时候，我基本上就是给 AI 写个长一点的 prompt，再自己检查一遍 diff。就算偶尔写错了，涉及的文件也不多，很容易看出来。

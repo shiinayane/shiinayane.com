@@ -9,6 +9,8 @@ lang: en
 translationKey: i-turned-my-ai-workflow-into-code
 ---
 
+> **Update, July 27, 2026:** The day after publishing this post, BiliKit M5.0 exposed the biggest problem with this workflow: it could make a chosen route increasingly rigorous without ever checking whether the problem should be solved that way. I am leaving the original post intact and wrote a follow-up: [I Turned My AI Workflow into Code. Then I Tore It Apart.](/posts/i-turned-my-ai-workflow-into-code-then-i-tore-it-apart/)
+
 BiliKit V1 is not finished yet, and the Swift codebase has already passed 21,000 lines.
 
 When the project was small, my AI workflow was straightforward: write a longer prompt, let the agent make the change, and check the diff myself. Even when it got something wrong, the change usually touched few enough files that I could spot it quickly.

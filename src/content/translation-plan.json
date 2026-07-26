@@ -21,6 +21,12 @@
 			"targets": { "zh": "published", "ja": "published" }
 		},
 		{
+			"key": "i-turned-my-ai-workflow-into-code-then-i-tore-it-apart",
+			"source": "zh",
+			"priority": "high",
+			"targets": { "en": "published", "ja": "published" }
+		},
+		{
 			"key": "whats-new-in-swift-wwdc26",
 			"source": "en",
 			"priority": "high",
