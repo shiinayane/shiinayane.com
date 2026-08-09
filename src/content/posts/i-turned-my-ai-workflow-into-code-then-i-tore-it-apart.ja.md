@@ -4,7 +4,7 @@ published: 2026-07-27
 description: "「AIワークフローをコードにしてみた」を公開した翌日、BiliKitのM5.0がその前提を崩した。"
 tags: [AI, Codex, Engineering, Workflow]
 category: Engineering
-draft: false
+draft: true
 lang: ja
 translationKey: i-turned-my-ai-workflow-into-code-then-i-tore-it-apart
 ---

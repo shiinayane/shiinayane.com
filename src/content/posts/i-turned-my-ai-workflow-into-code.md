@@ -4,7 +4,7 @@ published: 2026-07-25
 description: "BiliKit passed 21,000 lines before V1. I extracted the workflow it forced me to build into two reusable Codex Skills."
 tags: [AI, Codex, Engineering, Workflow]
 category: Engineering
-draft: false
+draft: true
 lang: en
 translationKey: i-turned-my-ai-workflow-into-code
 ---

@@ -4,7 +4,7 @@ published: 2026-07-25
 description: "BiliKitはV1完成前に2.1万行を超えた。そこで身についた作業手順を、再利用できる2つのCodex Skillとして切り出した。"
 tags: [AI, Codex, Engineering, Workflow]
 category: Engineering
-draft: false
+draft: true
 lang: ja
 translationKey: i-turned-my-ai-workflow-into-code
 ---

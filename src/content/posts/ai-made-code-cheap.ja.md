@@ -4,7 +4,7 @@ published: 2026-07-24
 description: "BiliKitはv1前の段階でSwift 21,300行になった。promptを書いてテストを回し、diffを読むだけでは足りなくなったので、開発フローそのものを見直した。"
 tags: [AI, Swift, Engineering, Workflow]
 category: Engineering
-draft: false
+draft: true
 lang: ja
 translationKey: ai-made-code-cheap
 ---

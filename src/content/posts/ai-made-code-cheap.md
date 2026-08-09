@@ -4,7 +4,7 @@ published: 2026-07-24
 description: "BiliKit reached 21,300 lines of Swift before v1. Here is why my original prompt-and-review workflow stopped working, and what I changed."
 tags: [AI, Swift, Engineering, Workflow]
 category: Engineering
-draft: false
+draft: true
 lang: en
 translationKey: ai-made-code-cheap
 ---

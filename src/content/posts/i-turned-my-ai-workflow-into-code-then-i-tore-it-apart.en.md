@@ -4,7 +4,7 @@ published: 2026-07-27
 description: "The day after I published I Turned My AI Workflow into Code, BiliKit M5.0 gave me a counterexample."
 tags: [AI, Codex, Engineering, Workflow]
 category: Engineering
-draft: false
+draft: true
 lang: en
 translationKey: i-turned-my-ai-workflow-into-code-then-i-tore-it-apart
 ---

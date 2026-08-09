@@ -4,7 +4,7 @@ published: 2026-07-27
 description: "《我把自己的 AI 工作流变成了代码》发布后的第二天，BiliKit M5.0 就给了我一个反例。"
 tags: [AI, Codex, Engineering, Workflow]
 category: Engineering
-draft: false
+draft: true
 lang: zh_CN
 translationKey: i-turned-my-ai-workflow-into-code-then-i-tore-it-apart
 ---
