@@ -2,110 +2,51 @@
 lang: ja
 translationKey: about
 title: プロフィール
-description: YANKAI WANG のプロジェクト、研究、経歴、技術的関心について。
+description: 現在取り組んでいるプロジェクトと、このサイトに書いていること。
 ---
 
 # プロフィール
 
-東京都在住。
+東京で大学院生をしています。研究テーマは科学実験室のロボットです。研究室の外では、Swift を書いたり、普段使っているソフトウェアの気になるところを直したりしています。
 
-メール：ykwang224[AT]gmail.com
+現在も続けているプロジェクトは次のとおりです。
 
----
+## 主なプロジェクト
 
-## 学歴
+### BiliKit for Mac
 
-**東京大学** · 2025年10月 – 2027年9月（予定）<br>
-情報通信工学専攻 修士課程。鈴村研究室にて、Vision-Language-Action（VLA）モデルと科学実験環境における人間・ロボット協働ベンチマークを研究しています。
+ネイティブかつ非公式の macOS 向け Bilibili クライアントです。動画のブラウズと検索、ログイン、視聴履歴、字幕、弾幕、再生は動くようになりました。日常利用に必要な機能を引き続き整えているため、まだ公開していません。
 
-**上海大学** · 2021年9月 – 2025年7月<br>
-電子情報工学 学士。
-
----
-
-## プロジェクト
+::github{repo="shiinayane/BiliKit-Mac"}
 
 ### KotobaLab
 
-*個人開発 · SwiftUI · GRDB 7 · SQLite · SwiftData · Swift Testing · iOS 18+*<br>
-*2026年4月 – 現在 · 東京*
-
-SwiftUI、MVVM、Clean Architecture を意識したレイヤー設計による、ローカルファーストの日本語辞書アプリです。現在はローカルで開発中です。
-
-- Python パイプラインで29.3万項目、約52 MBの SQLite データベースを生成し、アプリ内リソースとして同梱。
-- `PRAGMA case_sensitive_like=ON` により前方一致検索を最適化し、約16 msの全表走査を約0.03 msの複合インデックス検索まで短縮。
-- `AppDependencies → Scene → Store → View` の四層構造と、Repository プロトコル／依存性注入により Domain、UI、ストレージを分離。
-- GRDB で参照データ、SwiftData でユーザー状態を管理し、Swift Testing でユースケースと Repository の動作を検証。
-- 今後は SQLite FTS5、Swift Concurrency による actor 隔離、TestFlight ベータを予定。
+N1 以上の学習者に向けた iOS 用の日本語辞書・学習アプリです。辞書は端末内に保存してオフラインで検索でき、保存した単語などの個人データは別に管理します。現在も開発中です。
 
 ::github{repo="shiinayane/KotobaLab"}
 
 ### LabMate
 
-*鈴村研究室 · Python · Isaac Sim · VLA モデル*<br>
-*2025年12月 – 現在 · 東京*
+大学院での研究プロジェクトです。ロボットが自然言語の指示を受けたとき、いつ確認質問をするか、動作は安全か、失敗からどう復帰するかを扱います。現在は LabUtopia／Isaac Sim 上で再現可能なシミュレーション評価を進めています。
 
-科学実験環境における人間・ロボット協働のための、シミュレーション優先ベンチマークです。
+::github{repo="shiinayane/LabMate"}
 
-- LabUtopia を自然言語による協働タスクへ拡張し、確認質問、安全を考慮した拒否、グラウンディング、構造化ログを評価。
-- 複数段階の実験手順について、LLM、VLA、ハイブリッド型プランナーを比較する評価基盤を設計。
-- 導入済みの3種類のロボットとの将来的な統合を調整し、デモよりも厳密な評価方法を優先。
+## その他のプロジェクト
 
----
+### BiliKit
 
-## 経歴
+Bilibili 向けの userscript 集です。普段使う機能の改善と、アプリ風のおすすめフィードが入っています。もともとは自分用に始めたもので、現在は個別にインストールできる Core と Feed に分かれています。
 
-### GlucoPI
+::github{repo="shiinayane/BiliKit"}
 
-*学部卒業研究 · 指導教員：[Qi Zhang](https://scie.shu.edu.cn/Prof/zhangq.htm) 教授*<br>
-*2025年2月 – 2025年6月 · 上海*
+### BewlyCat Safari
 
-糖尿病の自己管理、医師とのコミュニケーション、血糖予測を支援する WeChat Mini Program。
+BewlyCat の Safari 向けメンテナンスブランチです。上流の更新を取り込みながら、macOS Safari の互換性問題を修正しています。
 
-- WeChat Mini Program、FastAPI、MySQL、MongoDB、WebSocket による一貫した自己管理システムを開発。
-- 認証と権限、血糖／食事／インスリン記録、医師との連携、リアルタイムメッセージ、推移グラフを実装。
-- OhioT1DM データセット上で GluPred を再現し、PyTorch による短期血糖予測を検証。
-- 診断を目的としない健康案内向けの軽量 LLM Q&A を統合。
+::github{repo="shiinayane/BewlyCat-Safari"}
 
-::github{repo="shiinayane/glucopi"}
+## このサイトについて
 
-### Arrived or Not
+開発中に出会った具体的な問題や、その時点でなぜそう判断したかを中心に書いています。記事は書いた当時の記録なので、あとから考えが変わることもあります。
 
-*共同リーダー · 指導教員：[Qi Zhang](https://scie.shu.edu.cn/Prof/zhangq.htm) 教授*<br>
-*2023年12月 – 2024年12月 · 上海*
-
-出席管理と授業運営のための機械視覚プラットフォーム。
-
-- RetinaFace と ArcFace 埋め込みを用いたリアルタイム顔認識出席管理を実装。
-- 教員／学生向けに授業作成、出席記録、基本的な参加状況の集計を提供。
-- Flutter クライアントと FastAPI サービスによる明確なフロントエンド／バックエンド分離を構築。
-
-::github{repo="shiinayane/Arrived-or-Not-Frontend"}
-
-::github{repo="shiinayane/Arrived-or-Not-Backend"}
-
----
-
-## 関心分野
-
-- **プロダクト優先のエンジニアリング**：実際の問題を解くことを中心に、iOS、バックエンド、フルスタックを手段として扱う。
-- **iOS ネイティブアーキテクチャ**：ローカルファースト設計と明確な Domain／UI 分離を重視し、公開できるネイティブアプリを作る。
-- **研究からプロダクトへ**：大学院で扱う VLA／LLM 研究を、コンシューマー向けモバイル体験へつなげる。
-
----
-
-## スキル
-
-- **iOS／Apple プラットフォーム**：Swift、SwiftUI、GRDB、SQLite、SwiftData、Observation、Swift Concurrency、Swift Testing
-- **アーキテクチャ／設計**：MVVM、Clean Architecture、Repository Pattern、Dependency Injection、Protocol-Oriented Programming
-- **バックエンド／Web**：Python（FastAPI）、JavaScript
-- **機械学習／研究**：PyTorch、VLA モデル、Isaac Sim
-- **ツール／プラットフォーム**：Git、Docker、Xcode、VS Code、macOS、Linux
-
----
-
-## 言語
-
-- **日本語**：ビジネスレベル（JLPT N1 121/180）
-- **英語**：業務レベル（TOEFL 97/120）
-- **中国語**：母語
+連絡は ykwang224[AT]gmail.com または [GitHub](https://github.com/shiinayane) までどうぞ。
