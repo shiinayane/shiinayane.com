@@ -4,7 +4,7 @@ published: 2026-04-21
 description: 我以为很简单……直到发现并不是
 tags: [Swift, Raptor, SSG, Web]
 category: Engineering
-draft: false
+draft: true
 lang: zh_CN
 translationKey: building-personal-website-in-swift
 ---

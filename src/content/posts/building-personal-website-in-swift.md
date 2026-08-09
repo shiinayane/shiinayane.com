@@ -4,7 +4,7 @@ published: 2026-04-21
 description: I Thought It Was Easy… Until It Wasn’t
 tags: [Swift, Raptor, SSG, Web]
 category: Engineering
-draft: false
+draft: true
 lang: en
 translationKey: building-personal-website-in-swift
 ---

@@ -4,7 +4,7 @@ published: 2026-04-21
 description: 簡単だと思っていた……実際にやってみるまでは
 tags: [Swift, Raptor, SSG, Web]
 category: Engineering
-draft: false
+draft: true
 lang: ja
 translationKey: building-personal-website-in-swift
 ---

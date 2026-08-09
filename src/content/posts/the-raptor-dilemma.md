@@ -4,7 +4,7 @@ published: 2026-05-02
 description: SwiftUI Dreams vs Web Reality
 tags: [Swift, SwiftUI, Raptor, SSG, Web]
 category: Engineering
-draft: false
+draft: true
 lang: en
 translationKey: the-raptor-dilemma
 ---

@@ -54,13 +54,13 @@
 			"key": "the-raptor-dilemma",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "published", "ja": "published" }
+			"targets": { "zh": "needs-review", "ja": "needs-review" }
 		},
 		{
 			"key": "building-personal-website-in-swift",
 			"source": "en",
 			"priority": "medium",
-			"targets": { "zh": "published", "ja": "published" }
+			"targets": { "zh": "needs-review", "ja": "needs-review" }
 		},
 		{
 			"key": "apple-music-style-navigation-titles",

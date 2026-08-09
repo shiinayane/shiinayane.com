@@ -4,7 +4,7 @@ published: 2026-05-02
 description: SwiftUIのような理想とWebの現実
 tags: [Swift, SwiftUI, Raptor, SSG, Web]
 category: Engineering
-draft: false
+draft: true
 lang: ja
 translationKey: the-raptor-dilemma
 ---
