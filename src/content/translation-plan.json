@@ -9,6 +9,12 @@
 	],
 	"posts": [
 		{
+			"key": "native-danmaku-renderer",
+			"source": "zh",
+			"priority": "high",
+			"targets": { "en": "published", "ja": "published" }
+		},
+		{
 			"key": "ai-made-code-cheap",
 			"source": "en",
 			"priority": "high",
