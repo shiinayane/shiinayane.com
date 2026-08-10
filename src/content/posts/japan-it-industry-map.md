@@ -2,11 +2,13 @@
 title: 日本 IT 行业地图：SIer、SES、Web 系和自社开发到底在分什么
 published: 2026-08-10
 description: 从商业模式、软件归属和合同关系出发，整理日本 IT 求职中最常见的几类公司与岗位
-tags: [日本, 求职, IT, Engineering]
-category: Engineering
+tags: [Japan, IT Industry, Job Hunting, SIer, SES]
+category: Career
 draft: false
 lang: zh_CN
 translationKey: japan-it-industry-map
+series: japan-job-hunting
+seriesOrder: 1
 ---
 
 开始看日本的 IT 招聘以后，我花了一段时间才弄明白一件事：招聘网站上那些经常放在一起比较的词，很多根本不在同一个分类维度里。

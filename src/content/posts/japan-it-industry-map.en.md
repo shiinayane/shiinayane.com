@@ -2,11 +2,13 @@
 title: "A Map of Japan's IT Industry: SIers, SES, Web Companies, and In-House Development"
 published: 2026-08-10
 description: "A practical guide to the business models, ownership structures, and contracts behind the labels used in Japanese IT recruiting."
-tags: [Japan, Careers, IT, Engineering]
-category: Engineering
+tags: [Japan, IT Industry, Job Hunting, SIer, SES]
+category: Career
 draft: false
 lang: en
 translationKey: japan-it-industry-map
+series: japan-job-hunting
+seriesOrder: 1
 ---
 
 When I started looking at IT jobs in Japan, it took me a while to notice that many of the terms compared on recruiting sites do not belong to the same classification system.

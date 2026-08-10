@@ -39,6 +39,22 @@ export const SERIES_META: Record<string, SeriesTranslations> = {
 			subtitle: "コンピュータサイエンスの基礎を日本語でまとめた学習ノート。",
 		},
 	},
+	"japan-job-hunting": {
+		en: {
+			name: "Job Hunting in Japan",
+			subtitle:
+				"A Chinese graduate student's notes on Japan's IT industry, new-graduate recruiting, and career choices.",
+		},
+		zh: {
+			name: "日本求职",
+			subtitle: "一个中国留学生对日本 IT 行业、新卒招聘与职业选择的记录。",
+		},
+		ja: {
+			name: "日本就活",
+			subtitle:
+				"中国人留学生の視点から、日本のIT業界、新卒採用、キャリア選択を記録する。",
+		},
+	},
 };
 
 export function getSeriesMeta(

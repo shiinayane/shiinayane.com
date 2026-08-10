@@ -2,11 +2,13 @@
 title: "日本のIT業界地図：SIer、SES、Web系、自社開発は何が違うのか"
 published: 2026-08-10
 description: "日本のIT就活でよく見る言葉を、ビジネスモデル、ソフトウェアの所有者、契約関係から整理する。"
-tags: [日本, 就活, IT, Engineering]
-category: Engineering
+tags: [Japan, IT Industry, Job Hunting, SIer, SES]
+category: Career
 draft: false
 lang: ja
 translationKey: japan-it-industry-map
+series: japan-job-hunting
+seriesOrder: 1
 ---
 
 日本でIT企業を調べ始めてから、求人サイトで比較されている言葉の多くが、同じ分類軸にないことに気づくまで少し時間がかかった。
