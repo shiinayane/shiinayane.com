@@ -9,6 +9,12 @@
 	],
 	"posts": [
 		{
+			"key": "japan-it-industry-map",
+			"source": "zh",
+			"priority": "medium",
+			"targets": { "en": "published", "ja": "published" }
+		},
+		{
 			"key": "native-danmaku-renderer",
 			"source": "zh",
 			"priority": "high",
