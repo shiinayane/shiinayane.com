@@ -7,6 +7,8 @@ category: Engineering
 draft: false
 lang: zh_CN
 translationKey: native-danmaku-renderer
+series: bilikit-development-notes
+seriesOrder: 1
 ---
 
 BiliKit 的弹幕模块目前有 1852 行 Swift，配套测试反而有 2802 行。

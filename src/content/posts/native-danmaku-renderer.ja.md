@@ -7,6 +7,8 @@ category: Engineering
 draft: false
 lang: ja
 translationKey: native-danmaku-renderer
+series: bilikit-development-notes
+seriesOrder: 1
 ---
 
 BiliKitの弾幕モジュールは、現在1852行のSwiftでできている。テストはそれより多く、2802行ある。

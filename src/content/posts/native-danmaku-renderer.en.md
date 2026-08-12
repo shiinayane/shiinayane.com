@@ -7,6 +7,8 @@ category: Engineering
 draft: false
 lang: en
 translationKey: native-danmaku-renderer
+series: bilikit-development-notes
+seriesOrder: 1
 ---
 
 The danmaku module in BiliKit currently contains 1,852 lines of Swift. Its tests are larger: 2,802 lines.

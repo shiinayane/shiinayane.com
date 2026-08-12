@@ -55,6 +55,22 @@ export const SERIES_META: Record<string, SeriesTranslations> = {
 				"中国人留学生の視点から、日本のIT業界、新卒採用、キャリア選択を記録する。",
 		},
 	},
+	"bilikit-development-notes": {
+		en: {
+			name: "BiliKit Development Notes",
+			subtitle:
+				"Problems, spikes, tradeoffs, and implementation notes from building BiliKit as a native macOS app.",
+		},
+		zh: {
+			name: "BiliKit 开发笔记",
+			subtitle: "记录 BiliKit 原生 macOS 开发中的问题、spike、取舍与最终实现。",
+		},
+		ja: {
+			name: "BiliKit 開発ノート",
+			subtitle:
+				"BiliKitをmacOSネイティブアプリとして開発する中で起きた問題、spike、判断、実装を記録する。",
+		},
+	},
 };
 
 export function getSeriesMeta(
