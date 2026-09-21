@@ -9,6 +9,12 @@
 	],
 	"posts": [
 		{
+			"key": "swift-format-configuration",
+			"source": "zh",
+			"priority": "high",
+			"targets": { "en": "published", "ja": "published" }
+		},
+		{
 			"key": "a-line-break-disaster",
 			"source": "zh",
 			"priority": "high",
