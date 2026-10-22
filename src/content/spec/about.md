@@ -15,7 +15,7 @@ These are the projects I still actively work on.
 
 ### BiliKit for Mac
 
-A native, unofficial Bilibili client for macOS. Browsing, search, sign-in, watch history, subtitles, danmaku, and playback are working. I'm still filling in what it needs for everyday use, so it has not been released yet.
+A native, unofficial Bilibili client for macOS. The first release shipped in September 2026, and signed, notarized builds are available from GitHub Releases. It covers recommendations, trending, search, QR sign-in with watch-history sync, Watch Later, and favorites; playback supports subtitles, danmaku, and multi-part videos. It requires an Apple Silicon Mac running macOS 15 or later.
 
 ::github{repo="shiinayane/BiliKit-Mac"}
 
@@ -33,11 +33,11 @@ My research project. It looks at how a robot should respond to natural-language 
 
 ## Other Projects
 
-### BiliKit
+### BiliKit-Web
 
-A set of userscripts for Bilibili, including everyday enhancements and an app-style recommendation feed. It started as something for my own use and later split into independently installable Core and Feed scripts.
+A set of Bilibili userscripts built to work well in Safari on macOS, including everyday enhancements and an app-style recommendation feed. It started as something for my own use and later split into independently installable Core and Feed scripts, which are now available on GreasyFork.
 
-::github{repo="shiinayane/BiliKit"}
+::github{repo="shiinayane/BiliKit-Web"}
 
 ### BewlyCat Safari
 

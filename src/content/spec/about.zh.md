@@ -15,7 +15,7 @@ description: 最近在做的项目，以及这个网站记录的内容。
 
 ### BiliKit for Mac
 
-原生、非官方的 macOS B 站客户端。现在已经可以浏览和搜索视频，也做了登录、观看历史、字幕、弹幕和播放。还在继续补日常使用需要的功能，暂时没有发布。
+原生、非官方的 macOS B 站客户端。2026 年 9 月发布了第一个正式版，可以从 GitHub Releases 下载签名并公证过的安装包。可以浏览推荐、热门和搜索，扫码登录后会同步观看历史，也能看稍后再看和收藏夹；播放支持字幕、弹幕和分 P。需要 Apple Silicon 和 macOS 15 以上。
 
 ::github{repo="shiinayane/BiliKit-Mac"}
 
@@ -33,11 +33,11 @@ description: 最近在做的项目，以及这个网站记录的内容。
 
 ## 其他项目
 
-### BiliKit
+### BiliKit-Web
 
-一组 B 站 userscript，包括常用功能增强和一个 App 风格的推荐流。最初只是自己用，后来慢慢拆成了可以独立安装的 Core 和 Feed。
+一组对 macOS Safari 友好的 B 站 userscript，包括常用功能增强和一个 App 风格的推荐流。最初只是自己用，后来慢慢拆成了可以独立安装的 Core 和 Feed，现在可以从 GreasyFork 安装。
 
-::github{repo="shiinayane/BiliKit"}
+::github{repo="shiinayane/BiliKit-Web"}
 
 ### BewlyCat Safari
 

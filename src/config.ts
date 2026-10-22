@@ -19,6 +19,7 @@ export const siteConfig: SiteConfig = {
 		enable: true,
 		src: "assets/images/banner.png", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 		position: "top", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
+		positionX: "72%", // (Optional) Horizontal focal point, any CSS length or percentage. Keeps the subject in frame on narrow screens. '50%' by default
 		credit: {
 			enable: false, // Display the credit text of the banner image
 			text: "椎名あやね", // Credit text to be displayed

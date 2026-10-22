@@ -15,7 +15,7 @@ description: 現在取り組んでいるプロジェクトと、このサイト�
 
 ### BiliKit for Mac
 
-ネイティブかつ非公式の macOS 向け Bilibili クライアントです。動画のブラウズと検索、ログイン、視聴履歴、字幕、弾幕、再生は動くようになりました。日常利用に必要な機能を引き続き整えているため、まだ公開していません。
+ネイティブかつ非公式の macOS 向け Bilibili クライアントです。2026 年 9 月に最初の正式版を公開し、署名・公証済みのインストーラを GitHub Releases から入手できます。おすすめ、人気、検索、QR コードでのログインと視聴履歴の同期、後で見る、お気に入りに対応し、再生では字幕、弾幕、複数パートの動画を扱えます。Apple Silicon 搭載の Mac と macOS 15 以降が必要です。
 
 ::github{repo="shiinayane/BiliKit-Mac"}
 
@@ -33,11 +33,11 @@ N1 以上の学習者に向けた iOS 用の日本語辞書・学習アプリで
 
 ## その他のプロジェクト
 
-### BiliKit
+### BiliKit-Web
 
-Bilibili 向けの userscript 集です。普段使う機能の改善と、アプリ風のおすすめフィードが入っています。もともとは自分用に始めたもので、現在は個別にインストールできる Core と Feed に分かれています。
+macOS の Safari でも快適に使える Bilibili 向けの userscript 集です。普段使う機能の改善と、アプリ風のおすすめフィードが入っています。もともとは自分用に始めたもので、現在は個別にインストールできる Core と Feed に分かれ、GreasyFork から入手できます。
 
-::github{repo="shiinayane/BiliKit"}
+::github{repo="shiinayane/BiliKit-Web"}
 
 ### BewlyCat Safari
 
