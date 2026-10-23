@@ -9,6 +9,12 @@
 	],
 	"posts": [
 		{
+			"key": "danmaku-sync-rewrite",
+			"source": "zh",
+			"priority": "high",
+			"targets": { "en": "published", "ja": "published" }
+		},
+		{
 			"key": "swift-format-configuration",
 			"source": "zh",
 			"priority": "high",
